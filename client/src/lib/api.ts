@@ -13,8 +13,14 @@ let _useClientMock: boolean | null = null;
 async function shouldUseMock(): Promise<boolean> {
   if (_useClientMock !== null) return _useClientMock;
   try {
-    await api.get('/dashboard/metrics', { timeout: 3000 });
-    _useClientMock = false;
+    const res = await api.get('/dashboard/metrics', { timeout: 3000 });
+    // Verify we got actual JSON back, not an HTML page (SPA fallback)
+    const ct = res.headers?.['content-type'] ?? '';
+    if (typeof res.data !== 'object' || ct.includes('text/html')) {
+      _useClientMock = true;
+    } else {
+      _useClientMock = false;
+    }
   } catch {
     _useClientMock = true;
   }

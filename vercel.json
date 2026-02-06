@@ -1,6 +1,7 @@
 {
   "outputDirectory": "client/dist",
   "rewrites": [
+    { "source": "/api/(.*)", "status": 404 },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
