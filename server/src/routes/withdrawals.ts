@@ -206,7 +206,7 @@ router.post('/create', async (req, res) => {
       id: newWithdrawalId,
       accountId: fundingAccount.trim(),
       clientId,
-      clientName: user.displayName || user.name || 'Unknown Client',
+      clientName: user.displayName || 'Unknown Client',
       amount,
       status: 'PENDING_LIQUIDATION' as const,
       requestDate: timestamp,

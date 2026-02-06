@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as stytch from '@stytch/node';
+import * as stytch from 'stytch';
 
 // TODO: Initialize Stytch client with environment variables
 // const stytchClient = new stytch.Client(
