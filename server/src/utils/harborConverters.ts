@@ -9,53 +9,91 @@ import {
   HarborDocument,
   HarborDocumentDetail,
   HarborUser,
+  LiquidationDetail,
   UIWithdrawal,
   UITransaction,
+  UILiquidationStatus,
+  UITransferStatus,
 } from '../types/harbor';
-import { differenceInBusinessDays } from 'date-fns';
+import { differenceInBusinessDays, differenceInCalendarDays } from 'date-fns';
 
 /**
- * Derive liquidation status from withdrawal status
+ * Derive liquidation status from withdrawal data per EDD.
+ * If a nested liquidation object is available, use its status directly.
+ * Otherwise, derive from the ACH Transfer status.
+ *
+ * EDD Liquidation (Cash Movement) statuses:
+ *   CREATED | PENDING | FAILED | COMPLETE | CANCELLED | PROCESSED_SUCCESSFULLY
  */
-function deriveLiquidationStatus(status: string): 'PENDING' | 'COMPLETED' | 'FAILED' | 'N/A' {
-  const normalizedStatus = status.toUpperCase();
-  
-  if (normalizedStatus.includes('PENDING_LIQUIDATION') || normalizedStatus.includes('LIQUIDATION_PENDING')) {
+function deriveLiquidationStatus(
+  achStatus: string,
+  liquidation?: LiquidationDetail,
+): UILiquidationStatus {
+  // If nested liquidation is present, use its status directly
+  if (liquidation) {
+    return liquidation.status;
+  }
+
+  // Fall back to deriving from ACH Transfer status
+  const s = achStatus.toUpperCase();
+
+  if (s === 'PENDING_LIQUIDATION') {
+    // Liquidation exists but we don't have the nested object; assume CREATED/PENDING
     return 'PENDING';
   }
-  if (normalizedStatus.includes('FAILED') || normalizedStatus.includes('APPROVAL_FAILED')) {
+  if (s === 'FAILED') {
     return 'FAILED';
   }
-  if (normalizedStatus.includes('TRANSFER') || normalizedStatus.includes('CREATED') || normalizedStatus.includes('COMPLETED')) {
-    return 'COMPLETED';
+  if (s === 'CANCELLED') {
+    return 'CANCELLED';
   }
-  if (normalizedStatus.includes('CANCELLED')) {
-    return 'N/A';
+  // If the ACH transfer has moved past PENDING_LIQUIDATION, liquidation is done
+  if (['CREATED', 'PROCESSING', 'PROCESSED', 'RETRYING', 'COMPLETE', 'RECONCILED', 'STALE'].includes(s)) {
+    return 'COMPLETE';
   }
-  return 'PENDING';
+  return 'N/A';
 }
 
 /**
- * Derive transfer status from withdrawal status
+ * Derive transfer (ACH) status from the ACH Transfer status per EDD.
+ *
+ * EDD ACH Transfer statuses:
+ *   CREATED | PENDING_LIQUIDATION | PROCESSING | PROCESSED | RETRYING |
+ *   RECONCILED | STALE | COMPLETE | FAILED | CANCELLED
  */
-function deriveTransferStatus(status: string, achTransferBatchId?: string | null): 'PENDING' | 'COMPLETED' | 'FAILED' | 'N/A' {
-  const normalizedStatus = status.toUpperCase();
-  
-  // If still in liquidation phase, transfer hasn't started
-  if (normalizedStatus.includes('PENDING_LIQUIDATION') || normalizedStatus.includes('LIQUIDATION_PENDING')) {
+function deriveTransferStatus(achStatus: string): UITransferStatus {
+  const s = achStatus.toUpperCase();
+
+  // Still waiting on liquidation — transfer hasn't started
+  if (s === 'PENDING_LIQUIDATION') {
     return 'N/A';
   }
-  if (normalizedStatus.includes('FAILED') || normalizedStatus.includes('APPROVAL_FAILED')) {
+  // Transfer queued or being processed
+  if (s === 'CREATED' || s === 'PROCESSING' || s === 'PROCESSED') {
+    return 'PENDING';
+  }
+  // Retrying after ACH rejection
+  if (s === 'RETRYING') {
+    return 'RETRYING';
+  }
+  // Successfully submitted to WSI
+  if (s === 'COMPLETE') {
+    return 'COMPLETE';
+  }
+  // Reconciled via BOD files
+  if (s === 'RECONCILED') {
+    return 'RECONCILED';
+  }
+  // Not reconciled after 7 days
+  if (s === 'STALE') {
+    return 'STALE';
+  }
+  // Terminal states
+  if (s === 'FAILED') {
     return 'FAILED';
   }
-  if (normalizedStatus.includes('CANCELLED')) {
+  if (s === 'CANCELLED') {
     return 'N/A';
-  }
-  if (normalizedStatus.includes('COMPLETED')) {
-    return 'COMPLETED';
-  }
-  if (normalizedStatus.includes('TRANSFER_PENDING') || normalizedStatus.includes('TRANSFER_CREATED') || normalizedStatus.includes('CREATED')) {
-    return achTransferBatchId ? 'PENDING' : 'PENDING';
   }
   return 'N/A';
 }
@@ -70,10 +108,18 @@ export function convertHarborWithdrawalToUIFormat(
   const now = new Date();
   const daysPending = differenceInBusinessDays(now, requestDate);
 
-  // If liquidation was skipped, show liquidation as COMPLETED
-  const liquidationStatus = withdrawal.liquidationSkipped 
-    ? 'COMPLETED' 
-    : deriveLiquidationStatus(withdrawal.status);
+  // If liquidation was skipped, show liquidation as COMPLETE
+  const liquidationStatus = withdrawal.liquidationSkipped
+    ? 'COMPLETE' as const
+    : deriveLiquidationStatus(withdrawal.status, withdrawal.liquidation);
+
+  // Calculate days to complete (liquidation completed -> transfer completed)
+  let daysToComplete: number | null = null;
+  if (withdrawal.liquidationCompletedDate && withdrawal.transferCompletedDate) {
+    const liqDate = new Date(withdrawal.liquidationCompletedDate);
+    const xferDate = new Date(withdrawal.transferCompletedDate);
+    daysToComplete = differenceInCalendarDays(xferDate, liqDate);
+  }
 
   return {
     id: withdrawal.id,
@@ -83,7 +129,7 @@ export function convertHarborWithdrawalToUIFormat(
     amount: withdrawal.amount,
     status: withdrawal.status,
     liquidationStatus,
-    transferStatus: deriveTransferStatus(withdrawal.status, withdrawal.achTransferBatchId),
+    transferStatus: deriveTransferStatus(withdrawal.status),
     requestDate: withdrawal.requestDate,
     daysPending,
     requestedAmount: withdrawal.requestedAmount ?? withdrawal.amount,
@@ -95,6 +141,10 @@ export function convertHarborWithdrawalToUIFormat(
     brokerageAccountNumber: withdrawal.brokerageAccountNumber,
     brokerageId: withdrawal.brokerageId,
     goalId: withdrawal.goalId,
+    // Nested liquidation detail from EDD
+    liquidation: withdrawal.liquidation,
+    // Completion metrics
+    daysToComplete,
     // Audit and action tracking
     auditLog: withdrawal.auditLog,
     reprocessedFromId: withdrawal.reprocessedFromId,
@@ -166,25 +216,21 @@ export function getTransactionTypeName(code: 'CR' | 'BUY' | 'SEL' | 'DR'): strin
 // ============================================================================
 
 /**
- * Map Harbor Payment Status to UI Withdrawal Status
+ * Map Harbor Payment Status to EDD-aligned ACH Transfer Status.
+ * Harbor Payment API uses a simpler status set; we map to the EDD ACH Transfer statuses.
  */
 export function mapPaymentStatusToWithdrawalStatus(
   status: HarborPaymentStatus,
-  transferType?: string
 ): string {
   switch (status) {
     case 'PENDING':
-      return 'Pending';
+      return 'CREATED';
     case 'PROCESSING':
-      // Differentiate based on transfer type if available
-      if (transferType === 'WIRE' || transferType === 'ACH') {
-        return 'Transfer_pending';
-      }
-      return 'Liquidation_pending';
-    case 'COMPLETED':
-      return 'COMPLETED';
+      return 'PROCESSING';
+    case 'COMPLETE':
+      return 'COMPLETE';
     case 'FAILED':
-      return 'Withdrawal_approval_failed';
+      return 'FAILED';
     case 'CANCELLED':
       return 'CANCELLED';
     default:
@@ -204,7 +250,6 @@ export function convertPaymentInstructionToWithdrawal(
 
   const status = mapPaymentStatusToWithdrawalStatus(
     paymentInstruction.status,
-    paymentInstruction.transferType
   );
 
   return {
@@ -226,7 +271,7 @@ export function convertPaymentInstructionToWithdrawal(
     achTransferBatchId: paymentInstruction.metadata?.achTransferBatchId || null,
     status,
     liquidationStatus: deriveLiquidationStatus(status),
-    transferStatus: deriveTransferStatus(status, paymentInstruction.metadata?.achTransferBatchId),
+    transferStatus: deriveTransferStatus(status),
     requestDate: paymentInstruction.createdAt,
     daysPending,
     brokerageAccountNumber: paymentInstruction.sourceAccount.accountNumber,

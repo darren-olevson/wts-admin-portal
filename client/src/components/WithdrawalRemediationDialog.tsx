@@ -148,7 +148,7 @@ function WithdrawalRemediationDialog({
     },
     'skip-liquidation': {
       title: 'Skip Liquidation',
-      description: 'This will bypass the liquidation engine and move the ACH transfer directly to TRANSFER_CREATED status. Use only when cash is already available.',
+      description: 'This will bypass the liquidation engine and move the ACH transfer directly to CREATED status, ready for ACH processing. Use only when cash is already available.',
       buttonText: 'Skip Liquidation',
       buttonClass: 'button-skip',
     },

@@ -31,7 +31,7 @@ export type TransactionDirection = 'CREDIT' | 'DEBIT';
 /**
  * Common status types.
  */
-export type CommonStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'N/A';
+export type CommonStatus = 'PENDING' | 'COMPLETE' | 'FAILED' | 'N/A';
 
 /**
  * Withdrawal type.

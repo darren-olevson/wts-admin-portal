@@ -160,8 +160,8 @@ router.get('/aged', async (req, res) => {
     const agedWithdrawals = mockWithdrawals
       .map(convertHarborWithdrawalToUIFormat)
       .filter((w) => {
-        // Exclude cancelled and completed/reconciled withdrawals
-        const excludedStatuses = ['CANCELLED', 'COMPLETED', 'RECONCILED'];
+        // Exclude cancelled, complete, and reconciled withdrawals
+        const excludedStatuses = ['CANCELLED', 'COMPLETE', 'RECONCILED'];
         const isNotExcluded = !excludedStatuses.includes(w.status.toUpperCase());
         // Only include withdrawals older than threshold
         const isAged = w.daysPending > thresholdDays;
@@ -480,17 +480,16 @@ router.post('/:withdrawalId/skip-liquidation', async (req, res) => {
     }
 
     // Validate: Only withdrawals in PENDING_LIQUIDATION status can skip
-    const validStatuses = ['Liquidation_pending', 'PENDING_LIQUIDATION'];
-    if (!validStatuses.includes(withdrawal.status)) {
+    if (withdrawal.status !== 'PENDING_LIQUIDATION') {
       return res.status(400).json({
-        error: `Cannot skip liquidation for withdrawal in ${withdrawal.status} status. Only pending liquidation withdrawals can skip.`,
+        error: `Cannot skip liquidation for withdrawal in ${withdrawal.status} status. Only PENDING_LIQUIDATION withdrawals can skip.`,
       });
     }
 
     const previousStatus = withdrawal.status;
     const timestamp = new Date().toISOString();
 
-    // Create audit entry
+    // Create audit entry - per EDD, skipping liquidation moves to CREATED (ready for ACH processing)
     const auditEntry = {
       id: `AUDIT-${Date.now()}`,
       action: 'SKIP_LIQUIDATION' as const,
@@ -498,13 +497,13 @@ router.post('/:withdrawalId/skip-liquidation', async (req, res) => {
       notes: `LIQUIDATION SKIPPED: ${notes.trim()}`,
       timestamp,
       previousStatus,
-      newStatus: 'TRANSFER_CREATED',
+      newStatus: 'CREATED',
     };
 
-    // Update the mock withdrawal in place
+    // Update the mock withdrawal in place - move to CREATED per EDD state diagram
     mockWithdrawals[withdrawalIndex] = {
       ...withdrawal,
-      status: 'TRANSFER_CREATED' as const,
+      status: 'CREATED' as const,
       achTransferBatchId: `ACH-BATCH-${Date.now()}`,
       updatedAt: timestamp,
       liquidationSkipped: true,
@@ -513,7 +512,7 @@ router.post('/:withdrawalId/skip-liquidation', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Liquidation bypassed successfully. Withdrawal moved to Transfer Created status.',
+      message: 'Liquidation bypassed successfully. Withdrawal moved to CREATED status.',
       withdrawal: convertHarborWithdrawalToUIFormat(mockWithdrawals[withdrawalIndex]),
     });
   } catch (error) {

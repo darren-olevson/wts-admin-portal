@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Clock, XCircle, Minus } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, Minus, AlertTriangle, RotateCw } from 'lucide-react';
 import { withdrawalsApi, Withdrawal } from '../lib/api';
 import './AgedWithdrawalQueue.css';
 
@@ -8,86 +8,35 @@ interface AgedWithdrawalQueueProps {
   thresholdDays?: number;
 }
 
-type StatusType = 'PENDING' | 'COMPLETED' | 'FAILED' | 'N/A';
+type TransferStatusType = 'PENDING' | 'COMPLETE' | 'FAILED' | 'RETRYING' | 'STALE' | 'RECONCILED' | 'N/A';
 
 /**
- * Derive liquidation status from the withdrawal status
+ * Get a display-friendly badge class for any status string.
+ * Used for both liquidation and transfer status columns.
  */
-function deriveLiquidationStatus(status: string): StatusType {
-  const normalizedStatus = status.toUpperCase().replace(/[_\s]+/g, '_');
-  
-  if (normalizedStatus.includes('PENDING_LIQUIDATION') || normalizedStatus.includes('LIQUIDATION_PENDING')) {
-    return 'PENDING';
-  }
-  if (normalizedStatus.includes('FAILED') || normalizedStatus.includes('APPROVAL_FAILED')) {
-    return 'FAILED';
-  }
-  if (normalizedStatus.includes('CANCELLED')) {
-    return 'N/A';
-  }
-  // If we're past liquidation (transfer phase or completed), liquidation is completed
-  if (normalizedStatus.includes('TRANSFER') || normalizedStatus.includes('CREATED') || normalizedStatus.includes('COMPLETED')) {
-    return 'COMPLETED';
-  }
-  return 'PENDING';
+function getStatusBadgeClass(status: string): string {
+  const s = status.toUpperCase();
+  if (s === 'COMPLETE' || s === 'RECONCILED' || s === 'PROCESSED_SUCCESSFULLY') return 'status-badge completed';
+  if (s === 'PENDING' || s === 'CREATED' || s === 'PROCESSING' || s === 'PROCESSED') return 'status-badge pending';
+  if (s === 'FAILED') return 'status-badge failed';
+  if (s === 'RETRYING' || s === 'STALE') return 'status-badge warning';
+  return 'status-badge na';
 }
 
-/**
- * Derive transfer status from the withdrawal status
- */
-function deriveTransferStatus(status: string, achTransferBatchId?: string | null): StatusType {
-  const normalizedStatus = status.toUpperCase().replace(/[_\s]+/g, '_');
-  
-  // If still in liquidation phase, transfer hasn't started
-  if (normalizedStatus.includes('PENDING_LIQUIDATION') || normalizedStatus.includes('LIQUIDATION_PENDING')) {
-    return 'N/A';
-  }
-  if (normalizedStatus.includes('FAILED') || normalizedStatus.includes('APPROVAL_FAILED')) {
-    return 'FAILED';
-  }
-  if (normalizedStatus.includes('CANCELLED')) {
-    return 'N/A';
-  }
-  if (normalizedStatus.includes('COMPLETED')) {
-    return 'COMPLETED';
-  }
-  // In transfer phase
-  if (normalizedStatus.includes('TRANSFER') || normalizedStatus.includes('CREATED')) {
-    return 'PENDING';
-  }
-  return 'N/A';
+function getStatusIcon(status: string) {
+  const s = status.toUpperCase();
+  if (s === 'COMPLETE' || s === 'RECONCILED' || s === 'PROCESSED_SUCCESSFULLY') return <CheckCircle size={14} />;
+  if (s === 'PENDING' || s === 'CREATED' || s === 'PROCESSING' || s === 'PROCESSED') return <Clock size={14} />;
+  if (s === 'FAILED') return <XCircle size={14} />;
+  if (s === 'RETRYING') return <RotateCw size={14} />;
+  if (s === 'STALE') return <AlertTriangle size={14} />;
+  return <Minus size={14} />;
 }
 
-function StatusBadge({ status, label }: { status: StatusType; label: string }) {
-  const getStatusIcon = () => {
-    switch (status) {
-      case 'COMPLETED':
-        return <CheckCircle size={14} />;
-      case 'PENDING':
-        return <Clock size={14} />;
-      case 'FAILED':
-        return <XCircle size={14} />;
-      default:
-        return <Minus size={14} />;
-    }
-  };
-
-  const getStatusClass = () => {
-    switch (status) {
-      case 'COMPLETED':
-        return 'status-badge completed';
-      case 'PENDING':
-        return 'status-badge pending';
-      case 'FAILED':
-        return 'status-badge failed';
-      default:
-        return 'status-badge na';
-    }
-  };
-
+function StatusBadge({ status, label }: { status: string; label: string }) {
   return (
-    <span className={getStatusClass()}>
-      {getStatusIcon()}
+    <span className={getStatusBadgeClass(status)}>
+      {getStatusIcon(status)}
       <span>{label}</span>
     </span>
   );
@@ -108,8 +57,8 @@ function AgedWithdrawalQueue({ thresholdDays = 6 }: AgedWithdrawalQueueProps) {
         });
         const filtered = data.filter((w) => {
           if (w.reconciliationStatus === 'MATCHED') return false;
-          const transferStatus = deriveTransferStatus(w.status, w.achTransferBatchId);
-          return transferStatus !== 'COMPLETED';
+          // Use the server-derived transferStatus directly
+          return w.transferStatus !== 'COMPLETE' && w.transferStatus !== 'RECONCILED';
         });
         setWithdrawals(filtered);
         setPage(1);
@@ -184,14 +133,14 @@ function AgedWithdrawalQueue({ thresholdDays = 6 }: AgedWithdrawalQueueProps) {
                   <td>${withdrawal.amount.toLocaleString()}</td>
                   <td>
                     <StatusBadge 
-                      status={deriveLiquidationStatus(withdrawal.status)} 
-                      label={deriveLiquidationStatus(withdrawal.status)} 
+                      status={withdrawal.liquidationStatus} 
+                      label={withdrawal.liquidationStatus} 
                     />
                   </td>
                   <td>
                     <StatusBadge 
-                      status={deriveTransferStatus(withdrawal.status, withdrawal.achTransferBatchId)} 
-                      label={deriveTransferStatus(withdrawal.status, withdrawal.achTransferBatchId)} 
+                      status={withdrawal.transferStatus} 
+                      label={withdrawal.transferStatus} 
                     />
                   </td>
                   <td>{withdrawal.daysPending} days</td>

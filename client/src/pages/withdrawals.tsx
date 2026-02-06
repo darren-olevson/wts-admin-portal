@@ -11,13 +11,15 @@ interface Withdrawal {
   clientName: string;
   amount: number;
   status: string;
-  liquidationStatus: 'PENDING' | 'COMPLETED' | 'FAILED' | 'N/A';
-  transferStatus: 'PENDING' | 'COMPLETED' | 'FAILED' | 'N/A';
+  liquidationStatus: string;
+  transferStatus: string;
   requestDate: string;
   daysPending: number;
   withdrawalType?: 'FULL' | 'PARTIAL';
   reconciliationStatus?: 'MATCHED' | 'UNMATCHED' | 'EXCEPTION';
   achTransferBatchId?: string | null;
+  // Completion metrics
+  daysToComplete?: number | null;
   // Action tracking
   reprocessedToId?: string;
   reprocessedFromId?: string;
@@ -47,6 +49,7 @@ function Withdrawals() {
       'Transfer Status',
       'Request Date',
       'Days Pending',
+      'Days to Complete',
     ],
     []
   );
@@ -104,21 +107,23 @@ function Withdrawals() {
   }, [fetchWithdrawals]);
 
   const getLiquidationStatusBadge = (status: string) => {
-    const statusLower = status.toLowerCase();
+    const s = status.toUpperCase();
     let className = 'status-badge-inline';
-    if (statusLower === 'completed') className += ' liquidation-completed';
-    else if (statusLower === 'pending') className += ' liquidation-pending';
-    else if (statusLower === 'failed') className += ' liquidation-failed';
+    if (s === 'COMPLETE' || s === 'PROCESSED_SUCCESSFULLY') className += ' liquidation-completed';
+    else if (s === 'PENDING' || s === 'CREATED') className += ' liquidation-pending';
+    else if (s === 'FAILED') className += ' liquidation-failed';
+    else if (s === 'CANCELLED') className += ' liquidation-failed';
     else className += ' liquidation-na';
     return <span className={className}>{status}</span>;
   };
 
   const getTransferStatusBadge = (status: string) => {
-    const statusLower = status.toLowerCase();
+    const s = status.toUpperCase();
     let className = 'status-badge-inline';
-    if (statusLower === 'completed') className += ' transfer-completed';
-    else if (statusLower === 'pending') className += ' transfer-pending';
-    else if (statusLower === 'failed') className += ' transfer-failed';
+    if (s === 'COMPLETE' || s === 'RECONCILED') className += ' transfer-completed';
+    else if (s === 'PENDING' || s === 'N/A') className += ' transfer-pending';
+    else if (s === 'FAILED') className += ' transfer-failed';
+    else if (s === 'RETRYING' || s === 'STALE') className += ' transfer-pending';
     else className += ' transfer-na';
     return <span className={className}>{status}</span>;
   };
@@ -181,8 +186,12 @@ function Withdrawals() {
             <option value="all">All Statuses</option>
             <option value="PENDING_LIQUIDATION">Pending Liquidation</option>
             <option value="CREATED">Created</option>
-            <option value="TRANSFER_CREATED">Transfer Created</option>
-            <option value="COMPLETED">Completed</option>
+            <option value="PROCESSING">Processing</option>
+            <option value="PROCESSED">Processed</option>
+            <option value="RETRYING">Retrying</option>
+            <option value="COMPLETE">Complete</option>
+            <option value="RECONCILED">Reconciled</option>
+            <option value="STALE">Stale</option>
             <option value="FAILED">Failed</option>
             <option value="CANCELLED">Cancelled</option>
           </select>
@@ -222,7 +231,7 @@ function Withdrawals() {
           <tbody>
             {withdrawals.length === 0 ? (
               <tr>
-                <td colSpan={9} className="empty-state">
+                <td colSpan={10} className="empty-state">
                   <AlertCircle size={40} className="empty-icon" />
                   <p>No withdrawals found</p>
                   <span>Try adjusting your filters</span>
@@ -268,12 +277,21 @@ function Withdrawals() {
                   <td>{getTransferStatusBadge(withdrawal.transferStatus)}</td>
                   <td>{new Date(withdrawal.requestDate).toLocaleDateString()}</td>
                   <td>
-                    {['COMPLETED', 'CANCELLED', 'FAILED'].includes(withdrawal.status?.toUpperCase()) ? (
+                    {['COMPLETE', 'RECONCILED', 'CANCELLED', 'FAILED'].includes(withdrawal.status?.toUpperCase()) ? (
                       <span className="days-pending-na">—</span>
                     ) : (
                       <span className={`days-pending ${withdrawal.daysPending > 6 ? 'warning' : ''}`}>
                         {withdrawal.daysPending} days
                       </span>
+                    )}
+                  </td>
+                  <td>
+                    {withdrawal.daysToComplete != null ? (
+                      <span className="days-to-complete">
+                        {withdrawal.daysToComplete} {withdrawal.daysToComplete === 1 ? 'day' : 'days'}
+                      </span>
+                    ) : (
+                      <span className="days-pending-na">—</span>
                     )}
                   </td>
                 </tr>

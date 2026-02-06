@@ -8,60 +8,33 @@ interface WithdrawalStatusBadgeProps {
 
 function WithdrawalStatusBadge({ status, daysPending }: WithdrawalStatusBadgeProps) {
   const getStatusConfig = () => {
-    const normalizedStatus = status.toLowerCase();
-    
-    if (normalizedStatus.includes('liquidation_pending')) {
-      return {
-        label: 'Liquidation Pending',
-        className: 'status-liquidation',
-      };
+    const s = status.toUpperCase();
+
+    // EDD ACH Transfer statuses
+    switch (s) {
+      case 'PENDING_LIQUIDATION':
+        return { label: 'Pending Liquidation', className: 'status-liquidation' };
+      case 'CREATED':
+        return { label: 'Created', className: 'status-transfer' };
+      case 'PROCESSING':
+        return { label: 'Processing', className: 'status-transfer' };
+      case 'PROCESSED':
+        return { label: 'Processed', className: 'status-transfer' };
+      case 'RETRYING':
+        return { label: 'Retrying', className: 'status-retrying' };
+      case 'RECONCILED':
+        return { label: 'Reconciled', className: 'status-completed' };
+      case 'STALE':
+        return { label: 'Stale', className: 'status-retrying' };
+      case 'COMPLETE':
+        return { label: 'Complete', className: 'status-completed' };
+      case 'FAILED':
+        return { label: 'Failed', className: 'status-failed' };
+      case 'CANCELLED':
+        return { label: 'Cancelled', className: 'status-cancelled' };
+      default:
+        return { label: status, className: 'status-default' };
     }
-    if (normalizedStatus.includes('pending_liquidation')) {
-      return {
-        label: 'Pending Liquidation',
-        className: 'status-liquidation',
-      };
-    }
-    if (normalizedStatus.includes('transfer_created')) {
-      return {
-        label: 'Transfer Created',
-        className: 'status-transfer',
-      };
-    }
-    if (normalizedStatus.includes('created')) {
-      return {
-        label: 'Created',
-        className: 'status-transfer',
-      };
-    }
-    if (normalizedStatus.includes('transfer_pending')) {
-      return {
-        label: 'Transfer Pending',
-        className: 'status-transfer',
-      };
-    }
-    if (normalizedStatus.includes('approval_failed') || normalizedStatus.includes('failed')) {
-      return {
-        label: 'Failed',
-        className: 'status-failed',
-      };
-    }
-    if (normalizedStatus.includes('cancelled')) {
-      return {
-        label: 'Cancelled',
-        className: 'status-cancelled',
-      };
-    }
-    if (normalizedStatus.includes('completed')) {
-      return {
-        label: 'Completed',
-        className: 'status-completed',
-      };
-    }
-    return {
-      label: status,
-      className: 'status-default',
-    };
   };
 
   const config = getStatusConfig();

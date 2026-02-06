@@ -18,15 +18,27 @@ export interface HarborWithdrawal {
   updatedAt: string;
 }
 
+// ACH Transfer Status per EDD (Combination Endpoint)
 export type HarborWithdrawalStatus =
-  | 'Liquidation_pending'
-  | 'Transfer_pending'
-  | 'Withdrawal_approval_failed'
-  | 'CANCELLED'
-  | 'COMPLETED'
+  | 'CREATED'
+  | 'PENDING_LIQUIDATION'
+  | 'PROCESSING'
+  | 'PROCESSED'
+  | 'RETRYING'
+  | 'RECONCILED'
+  | 'STALE'
+  | 'COMPLETE'
+  | 'FAILED'
+  | 'CANCELLED';
+
+// Liquidation (Cash Movement) Status per EDD
+export type LiquidationStatus =
+  | 'CREATED'
   | 'PENDING'
-  | 'APPROVED'
-  | 'REJECTED';
+  | 'FAILED'
+  | 'COMPLETE'
+  | 'CANCELLED'
+  | 'PROCESSED_SUCCESSFULLY';
 
 export interface HarborAccountBalance {
   accountId: string;

@@ -31,18 +31,23 @@ function StatusFunnel() {
   const stages = useMemo<FunnelStage[]>(() => {
     const liquidation = withdrawals.filter(
       (w) =>
-        w.status.toLowerCase().includes('pending_liquidation') &&
+        w.status.toUpperCase() === 'PENDING_LIQUIDATION' &&
         w.daysPending > 2
     ).length;
     const transfer = withdrawals.filter(
       (w) =>
-        (w.status.toLowerCase().includes('created') ||
-          w.status.toLowerCase().includes('transfer_created')) &&
+        w.status.toUpperCase() === 'CREATED' &&
         !w.achTransferBatchId
+    ).length;
+    const retrying = withdrawals.filter(
+      (w) => w.status.toUpperCase() === 'RETRYING'
+    ).length;
+    const stale = withdrawals.filter(
+      (w) => w.status.toUpperCase() === 'STALE'
     ).length;
     const reconciliation = withdrawals.filter(
       (w) =>
-        w.status.toLowerCase().includes('completed') &&
+        w.status.toUpperCase() === 'COMPLETE' &&
         w.reconciliationStatus !== 'MATCHED'
     ).length;
 
@@ -55,12 +60,22 @@ function StatusFunnel() {
       {
         label: 'Transfer',
         count: transfer,
-        description: 'Created with no transfer assignment',
+        description: 'Created with no ACH batch assigned',
+      },
+      {
+        label: 'Retrying',
+        count: retrying,
+        description: 'ACH rejected, awaiting retry',
+      },
+      {
+        label: 'Stale',
+        count: stale,
+        description: 'Not reconciled after 7 days',
       },
       {
         label: 'Reconciliation',
         count: reconciliation,
-        description: 'Completed but not reconciled',
+        description: 'Complete but not reconciled',
       },
     ];
   }, [withdrawals]);

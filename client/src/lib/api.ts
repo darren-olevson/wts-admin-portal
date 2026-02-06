@@ -45,8 +45,10 @@ export interface Withdrawal {
   clientName: string;
   amount: number;
   status: string;
-  liquidationStatus: 'PENDING' | 'COMPLETED' | 'FAILED' | 'N/A';
-  transferStatus: 'PENDING' | 'COMPLETED' | 'FAILED' | 'N/A';
+  // EDD-aligned liquidation status (Cash Movement): CREATED | PENDING | COMPLETE | FAILED | CANCELLED | PROCESSED_SUCCESSFULLY | N/A
+  liquidationStatus: string;
+  // EDD-aligned transfer status (ACH Transfer): PENDING | COMPLETE | FAILED | RETRYING | STALE | RECONCILED | N/A
+  transferStatus: string;
   requestDate: string;
   daysPending: number;
   requestedAmount?: number;
@@ -71,10 +73,11 @@ export interface DashboardMetrics {
   withdrawalExceptions: number;
   totalWithdrawalAmount: number;
   statusSummary?: {
-    liquidationPending: number;
+    pendingLiquidation: number;
     transferPending: number;
     completed: number;
-    approvalFailed: number;
+    failed: number;
+    retrying: number;
   };
 }
 

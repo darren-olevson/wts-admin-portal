@@ -118,15 +118,41 @@ All Harbor API responses follow this standard structure:
 
 ## Data Type Mappings
 
-### Payment Status Mapping
+### Payment Status Mapping (Harbor Payment API to EDD ACH Transfer Status)
 
-| Harbor Payment Status | Portal Withdrawal Status |
+| Harbor Payment Status | EDD ACH Transfer Status |
 |----------------------|--------------------------|
-| `PENDING` | `Pending` |
-| `PROCESSING` | `Liquidation_pending` or `Transfer_pending` |
-| `COMPLETED` | `COMPLETED` |
-| `FAILED` | `Withdrawal_approval_failed` |
+| `PENDING` | `CREATED` |
+| `PROCESSING` | `PROCESSING` |
+| `COMPLETED` | `COMPLETE` |
+| `FAILED` | `FAILED` |
 | `CANCELLED` | `CANCELLED` |
+
+### ACH Transfer Status (per EDD Combination Endpoint)
+
+| Status | Description |
+|--------|-------------|
+| `CREATED` | Initial state (no liquidation) or post-liquidation settlement |
+| `PENDING_LIQUIDATION` | Awaiting liquidation completion |
+| `PROCESSING` | ACH job picked up for processing |
+| `PROCESSED` | Submitted to ACH Network |
+| `RETRYING` | Rejected by ACH Network, will retry |
+| `RECONCILED` | Reconciled via BOD files |
+| `STALE` | Not reconciled after 7 days |
+| `COMPLETE` | Successfully completed |
+| `FAILED` | Terminal failure |
+| `CANCELLED` | Manually cancelled |
+
+### Liquidation Status (Cash Movement, per EDD)
+
+| Status | Description |
+|--------|-------------|
+| `CREATED` | Initial state, request sent to Pillar |
+| `PENDING` | Awaiting execution |
+| `FAILED` | Liquidation process failed |
+| `COMPLETE` | Successfully completed, cash available |
+| `CANCELLED` | Manually cancelled |
+| `PROCESSED_SUCCESSFULLY` | CASH Record processed and sent to WSI |
 
 ### Document Type Mapping
 

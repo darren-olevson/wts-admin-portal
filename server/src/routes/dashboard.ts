@@ -17,28 +17,33 @@ router.get('/metrics', async (req, res) => {
       .map(convertHarborWithdrawalToUIFormat)
       .filter((w) => w.daysPending > 6).length;
 
-    // Calculate total completed withdrawals amount
+    // Calculate total completed withdrawals amount (EDD uses COMPLETE)
     const totalWithdrawalAmount = mockWithdrawals
-      .filter((w) => w.status === 'COMPLETED')
+      .filter((w) => w.status === 'COMPLETE' || w.status === 'RECONCILED')
       .reduce((sum, w) => sum + (w.amount || 0), 0);
 
-    // Calculate withdrawal status summary
+    // Calculate withdrawal status summary per EDD statuses
     const statusSummary = {
-      liquidationPending: mockWithdrawals.filter(
-        (w) => w.status === 'Liquidation_pending' || w.status === 'PENDING_LIQUIDATION'
+      pendingLiquidation: mockWithdrawals.filter(
+        (w) => w.status === 'PENDING_LIQUIDATION'
       ).length,
       transferPending: mockWithdrawals.filter(
         (w) =>
-          w.status === 'Transfer_pending' ||
           w.status === 'CREATED' ||
-          w.status === 'TRANSFER_CREATED'
+          w.status === 'PROCESSING' ||
+          w.status === 'PROCESSED'
       ).length,
-      completed: mockWithdrawals.filter((w) => w.status === 'COMPLETED').length,
-      approvalFailed: mockWithdrawals.filter(
-        (w) => w.status === 'Withdrawal_approval_failed' || w.status === 'FAILED'
+      completed: mockWithdrawals.filter(
+        (w) => w.status === 'COMPLETE' || w.status === 'RECONCILED'
+      ).length,
+      failed: mockWithdrawals.filter(
+        (w) => w.status === 'FAILED'
+      ).length,
+      retrying: mockWithdrawals.filter(
+        (w) => w.status === 'RETRYING' || w.status === 'STALE'
       ).length,
       reconciliationPending: mockWithdrawals.filter(
-        (w) => w.status === 'COMPLETED' && w.reconciliationStatus !== 'MATCHED'
+        (w) => w.status === 'COMPLETE' && w.reconciliationStatus !== 'MATCHED'
       ).length,
     };
 

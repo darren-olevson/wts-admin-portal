@@ -19,7 +19,7 @@ const mockWithdrawals: HarborWithdrawal[] = [
     clientName: 'John Doe',
     requestAmount: 5000.00,
     requestDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
-    status: 'Liquidation_pending',
+    status: 'PENDING_LIQUIDATION',
     brokerageAccountNumber: 'BR-789',
     brokerageId: 'broker-001',
     goalId: 'goal-123',
@@ -33,7 +33,7 @@ const mockWithdrawals: HarborWithdrawal[] = [
     clientName: 'Jane Smith',
     requestAmount: 10000.00,
     requestDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-    status: 'Transfer_pending',
+    status: 'CREATED',
     brokerageAccountNumber: 'BR-790',
     brokerageId: 'broker-001',
     goalId: 'goal-124',
@@ -47,7 +47,7 @@ const mockWithdrawals: HarborWithdrawal[] = [
     clientName: 'Bob Johnson',
     requestAmount: 2500.00,
     requestDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), // 8 days ago - exception
-    status: 'Withdrawal_approval_failed',
+    status: 'FAILED',
     brokerageAccountNumber: 'BR-791',
     brokerageId: 'broker-001',
     goalId: 'goal-125',

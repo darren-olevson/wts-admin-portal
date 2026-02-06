@@ -73,21 +73,23 @@ function UserWithdrawalsTab({
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedWithdrawals = withdrawals.slice(startIndex, endIndex);
   const getLiquidationStatusBadge = (status: string) => {
-    const statusLower = status.toLowerCase();
+    const s = status.toUpperCase();
     let className = 'user-withdrawals-status status-badge-inline';
-    if (statusLower === 'completed') className += ' liquidation-completed';
-    else if (statusLower === 'pending') className += ' liquidation-pending';
-    else if (statusLower === 'failed') className += ' liquidation-failed';
+    if (s === 'COMPLETE' || s === 'PROCESSED_SUCCESSFULLY') className += ' liquidation-completed';
+    else if (s === 'PENDING' || s === 'CREATED') className += ' liquidation-pending';
+    else if (s === 'FAILED') className += ' liquidation-failed';
+    else if (s === 'CANCELLED') className += ' liquidation-failed';
     else className += ' liquidation-na';
     return <span className={className}>{status}</span>;
   };
 
   const getTransferStatusBadge = (status: string) => {
-    const statusLower = status.toLowerCase();
+    const s = status.toUpperCase();
     let className = 'user-withdrawals-status status-badge-inline';
-    if (statusLower === 'completed') className += ' transfer-completed';
-    else if (statusLower === 'pending') className += ' transfer-pending';
-    else if (statusLower === 'failed') className += ' transfer-failed';
+    if (s === 'COMPLETE' || s === 'RECONCILED') className += ' transfer-completed';
+    else if (s === 'PENDING' || s === 'N/A') className += ' transfer-pending';
+    else if (s === 'FAILED') className += ' transfer-failed';
+    else if (s === 'RETRYING' || s === 'STALE') className += ' transfer-pending';
     else className += ' transfer-na';
     return <span className={className}>{status}</span>;
   };
@@ -178,7 +180,7 @@ function UserWithdrawalsTab({
                 <td>{getTransferStatusBadge(withdrawal.transferStatus)}</td>
                 <td>{new Date(withdrawal.requestDate).toLocaleDateString()}</td>
                 <td>
-                  {['COMPLETED', 'CANCELLED', 'FAILED'].includes(withdrawal.status?.toUpperCase()) ? (
+                  {['COMPLETE', 'RECONCILED', 'CANCELLED', 'FAILED'].includes(withdrawal.status?.toUpperCase()) ? (
                     <span className="days-pending-na">—</span>
                   ) : (
                     <span

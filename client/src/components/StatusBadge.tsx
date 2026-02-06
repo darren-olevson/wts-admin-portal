@@ -28,7 +28,7 @@ interface StatusBadgeProps {
  * Automatically determines the appropriate variant based on common status patterns.
  * 
  * @example
- * <StatusBadge status="COMPLETED" />
+ * <StatusBadge status="COMPLETE" />
  * <StatusBadge status="PENDING" showIcon />
  * <StatusBadge status="Custom" variant="warning" />
  */
@@ -58,12 +58,12 @@ export function StatusBadge({
 
 function getVariantFromStatus(status: string): BadgeVariant {
   // Success patterns
-  if (/^(COMPLETED|MATCHED|ACTIVE|APPROVED|SUCCESS|DONE|VERIFIED)$/.test(status)) {
+  if (/^(COMPLETE|COMPLETED|RECONCILED|MATCHED|ACTIVE|APPROVED|SUCCESS|DONE|VERIFIED|PROCESSED_SUCCESSFULLY)$/.test(status)) {
     return 'success';
   }
   
   // Warning patterns
-  if (/^(PENDING|UNMATCHED|PROCESSING|IN.?PROGRESS|WAITING|REVIEW)$/.test(status)) {
+  if (/^(PENDING|PENDING_LIQUIDATION|UNMATCHED|PROCESSING|PROCESSED|CREATED|IN.?PROGRESS|WAITING|REVIEW|RETRYING|STALE)$/.test(status)) {
     return 'warning';
   }
   
@@ -105,25 +105,25 @@ function getIconForVariant(variant: BadgeVariant): ReactNode {
 // Specialized badge components for common use cases
 
 interface LiquidationStatusBadgeProps {
-  status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'N/A';
+  status: string;
 }
 
 /**
  * Specialized badge for liquidation status.
  */
 export function LiquidationStatusBadge({ status }: LiquidationStatusBadgeProps): JSX.Element {
-  return <StatusBadge status={status} showIcon />;
+  return <StatusBadge status={status as any} showIcon />;
 }
 
 interface TransferStatusBadgeProps {
-  status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'N/A';
+  status: string;
 }
 
 /**
  * Specialized badge for transfer status.
  */
 export function TransferStatusBadge({ status }: TransferStatusBadgeProps): JSX.Element {
-  return <StatusBadge status={status} showIcon />;
+  return <StatusBadge status={status as any} showIcon />;
 }
 
 interface ReconciliationStatusBadgeProps {

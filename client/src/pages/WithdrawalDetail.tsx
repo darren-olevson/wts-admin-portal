@@ -30,7 +30,7 @@ interface CorrespondingTransfer {
   id: string;
   externalId: string;
   amount: number;
-  status: 'COMPLETED' | 'PENDING' | 'FAILED';
+  status: 'CREATED' | 'PROCESSING' | 'PROCESSED' | 'COMPLETE' | 'RETRYING' | 'RECONCILED' | 'STALE' | 'FAILED' | 'CANCELLED';
   matched: boolean;
   matchedTimestamp?: string;
   createdAt: string;
@@ -41,7 +41,7 @@ interface CorrespondingLiquidation {
   id: string;
   requestId: string;
   amount: number;
-  status: 'REQUESTED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  status: 'CREATED' | 'PENDING' | 'COMPLETE' | 'FAILED' | 'CANCELLED' | 'PROCESSED_SUCCESSFULLY';
   liquidationType: 'FULL' | 'PARTIAL';
   createdAt: string;
   updatedAt: string;
@@ -140,19 +140,30 @@ function WithdrawalDetail() {
       setLoading(true);
       const data = await withdrawalsApi.get(withdrawalId);
       const statusUpper = data.status?.toUpperCase();
-      const isCompleted = statusUpper === 'COMPLETED';
+      const isComplete = statusUpper === 'COMPLETE' || statusUpper === 'RECONCILED';
       const isCancelled = statusUpper === 'CANCELLED';
+      const isFailed = statusUpper === 'FAILED';
       const isMatched = (data as any).reconciliationStatus === 'MATCHED';
       
-      // Determine transfer status based on withdrawal status
-      let transferStatus: CorrespondingTransfer['status'] = 'PENDING';
-      if (isCompleted) transferStatus = 'COMPLETED';
-      else if (isCancelled) transferStatus = 'FAILED';
+      // Determine transfer status based on ACH Transfer status per EDD
+      let transferStatus: CorrespondingTransfer['status'] = 'CREATED';
+      if (isComplete) transferStatus = 'COMPLETE';
+      else if (isCancelled) transferStatus = 'CANCELLED';
+      else if (isFailed) transferStatus = 'FAILED';
+      else if (statusUpper === 'PROCESSING') transferStatus = 'PROCESSING';
+      else if (statusUpper === 'PROCESSED') transferStatus = 'PROCESSED';
+      else if (statusUpper === 'RETRYING') transferStatus = 'RETRYING';
+      else if (statusUpper === 'STALE') transferStatus = 'STALE';
+      else if (statusUpper === 'RECONCILED') transferStatus = 'RECONCILED';
 
-      // Determine liquidation status based on withdrawal status
-      let liquidationStatus: CorrespondingLiquidation['status'] = 'REQUESTED';
-      if (isCompleted) liquidationStatus = 'COMPLETED';
-      else if (isCancelled) liquidationStatus = 'FAILED';
+      // Determine liquidation status based on EDD Cash Movement statuses
+      let liquidationStatus: CorrespondingLiquidation['status'] = 'CREATED';
+      if (isComplete || ['CREATED', 'PROCESSING', 'PROCESSED', 'RETRYING', 'STALE', 'RECONCILED'].includes(statusUpper)) {
+        liquidationStatus = 'COMPLETE';
+      }
+      if (statusUpper === 'PENDING_LIQUIDATION') liquidationStatus = 'PENDING';
+      if (isCancelled) liquidationStatus = 'CANCELLED';
+      if (isFailed) liquidationStatus = 'FAILED';
 
       const correspondingTransfer: CorrespondingTransfer = {
         id: Math.floor(Math.random() * 9000000 + 1000000).toString(),
@@ -631,7 +642,7 @@ function WithdrawalDetail() {
       )}
 
       {/* Remediation Actions */}
-      {isAdmin && !['COMPLETED', 'CANCELLED', 'FAILED'].includes(withdrawal.status?.toUpperCase()) && (
+      {isAdmin && !['COMPLETE', 'RECONCILED', 'CANCELLED', 'FAILED'].includes(withdrawal.status?.toUpperCase()) && (
         <div className="remediation-section">
           <h2 className="section-title">Remediation Actions</h2>
           <div className="remediation-actions">

@@ -121,7 +121,7 @@ This document identifies and documents the Harbor API endpoints required for the
   "accountId": "string",
   "clientId": "string",
   "clientName": "string",
-  "status": "Liquidation_pending",
+  "status": "PENDING_LIQUIDATION",
   "requestAmount": 0.00,
   "requestDate": "2024-01-01T00:00:00Z",
   "brokerageAccountNumber": "string",
@@ -139,13 +139,17 @@ This document identifies and documents the Harbor API endpoints required for the
 }
 ```
 
-**Withdrawal Status Values**:
-- `Liquidation_pending`: Awaiting liquidation of securities
-- `Transfer_pending`: Awaiting transfer to external account
-- `Withdrawal_approval_failed`: Withdrawal approval failed
-- `CANCELLED`: Withdrawal cancelled
-- `COMPLETED`: Withdrawal completed
-- `PENDING`: Initial pending state
+**ACH Transfer Status Values (per EDD)**:
+- `CREATED`: Initial state (no liquidation) or post-liquidation settlement
+- `PENDING_LIQUIDATION`: Awaiting liquidation completion
+- `PROCESSING`: ACH job picked up for processing
+- `PROCESSED`: Submitted to ACH Network
+- `RETRYING`: Rejected by ACH, will retry
+- `RECONCILED`: Reconciled via BOD files
+- `STALE`: Not reconciled after 7 days
+- `COMPLETE`: Successfully completed
+- `FAILED`: Terminal failure
+- `CANCELLED`: Manually cancelled
 
 **Status Codes**:
 - `200`: Success
@@ -180,7 +184,7 @@ This document identifies and documents the Harbor API endpoints required for the
       "accountId": "string",
       "clientId": "string",
       "clientName": "string",
-      "status": "Liquidation_pending",
+      "status": "PENDING_LIQUIDATION",
       "requestAmount": 0.00,
       "requestDate": "2024-01-01T00:00:00Z",
       "ageInDays": 0

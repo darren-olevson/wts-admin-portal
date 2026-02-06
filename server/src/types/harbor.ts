@@ -57,7 +57,7 @@ export interface HarborPaymentInstruction {
 export type HarborPaymentStatus =
   | 'PENDING'
   | 'PROCESSING'
-  | 'COMPLETED'
+  | 'COMPLETE'
   | 'FAILED'
   | 'CANCELLED';
 
@@ -72,7 +72,7 @@ export interface AuditEntry {
   newStatus?: string;
 }
 
-// Legacy withdrawal types (kept for backwards compatibility with mock data)
+// Withdrawal (ACH Transfer) record per EDD
 export interface HarborWithdrawal {
   id: string;
   accountId: string;
@@ -91,6 +91,11 @@ export interface HarborWithdrawal {
   goalId?: string;
   createdAt: string;
   updatedAt: string;
+  // Nested liquidation object per EDD
+  liquidation?: LiquidationDetail;
+  // Milestone dates
+  liquidationCompletedDate?: string;
+  transferCompletedDate?: string;
   // Audit and action tracking
   auditLog?: AuditEntry[];
   reprocessedFromId?: string;
@@ -99,16 +104,43 @@ export interface HarborWithdrawal {
   transferType?: 'ACH' | 'WIRE' | 'CARD';
 }
 
+// ACH Transfer Status per EDD (Combination Endpoint)
 export type HarborWithdrawalStatus =
-  | 'Liquidation_pending'
-  | 'Transfer_pending'
-  | 'Withdrawal_approval_failed'
-  | 'CANCELLED'
-  | 'COMPLETED'
-  | 'PENDING_LIQUIDATION'
   | 'CREATED'
-  | 'TRANSFER_CREATED'
-  | 'FAILED';
+  | 'PENDING_LIQUIDATION'
+  | 'PROCESSING'
+  | 'PROCESSED'
+  | 'RETRYING'
+  | 'RECONCILED'
+  | 'STALE'
+  | 'COMPLETE'
+  | 'FAILED'
+  | 'CANCELLED';
+
+// Liquidation (Cash Movement) Status per EDD
+export type LiquidationStatus =
+  | 'CREATED'
+  | 'PENDING'
+  | 'FAILED'
+  | 'COMPLETE'
+  | 'CANCELLED'
+  | 'PROCESSED_SUCCESSFULLY';
+
+// Nested liquidation object returned by the combination endpoint
+export interface LiquidationDetail {
+  id: string;
+  partnerUserSleeveID?: string;
+  accountNumber?: string;
+  amount: number;
+  direction?: 'SELL';
+  isFullLiquidation: boolean;
+  status: LiquidationStatus;
+  createdBy?: string;
+  created?: number;
+  modifiedBy?: string;
+  modified?: number;
+  objectVersion?: number;
+}
 
 export interface HarborAccountBalance {
   accountId: string;
@@ -282,6 +314,12 @@ export interface HarborOrderValidation {
   warnings: string[];
 }
 
+// Derived liquidation status for UI display
+export type UILiquidationStatus = LiquidationStatus | 'N/A';
+
+// Derived transfer status for UI display
+export type UITransferStatus = 'PENDING' | 'COMPLETE' | 'FAILED' | 'RETRYING' | 'STALE' | 'RECONCILED' | 'N/A';
+
 // UI-facing types (converted from Harbor types)
 export interface UIWithdrawal {
   id: string;
@@ -290,8 +328,8 @@ export interface UIWithdrawal {
   clientName: string;
   amount: number;
   status: string;
-  liquidationStatus: 'PENDING' | 'COMPLETED' | 'FAILED' | 'N/A';
-  transferStatus: 'PENDING' | 'COMPLETED' | 'FAILED' | 'N/A';
+  liquidationStatus: UILiquidationStatus;
+  transferStatus: UITransferStatus;
   requestDate: string;
   daysPending: number;
   requestedAmount?: number;
@@ -303,6 +341,10 @@ export interface UIWithdrawal {
   brokerageAccountNumber?: string;
   brokerageId?: string;
   goalId?: string;
+  // Nested liquidation detail from EDD
+  liquidation?: LiquidationDetail;
+  // Completion metrics
+  daysToComplete?: number | null;
   // Audit and action tracking
   auditLog?: AuditEntry[];
   reprocessedFromId?: string;

@@ -22,10 +22,11 @@ interface DashboardMetrics {
   withdrawalExceptions: number;
   totalWithdrawalAmount: number;
   statusSummary?: {
-    liquidationPending: number;
+    pendingLiquidation: number;
     transferPending: number;
     completed: number;
-    approvalFailed: number;
+    failed: number;
+    retrying: number;
     reconciliationPending?: number;
   };
 }
@@ -265,10 +266,10 @@ function Dashboard() {
           <div className="status-cards status-cards-horizontal">
             <div className="status-card liquidation">
               <div className="status-card-header">
-                <span className="status-label">Liquidation Pending</span>
+                <span className="status-label">Pending Liquidation</span>
                 <Clock size={16} />
               </div>
-              <span className="status-count">{metrics.statusSummary?.liquidationPending || 0}</span>
+              <span className="status-count">{metrics.statusSummary?.pendingLiquidation || 0}</span>
             </div>
             <div className="status-card transfer">
               <div className="status-card-header">
@@ -279,7 +280,7 @@ function Dashboard() {
             </div>
             <div className="status-card completed">
               <div className="status-card-header">
-                <span className="status-label">Withdrawals Completed</span>
+                <span className="status-label">Completed</span>
                 <CheckCircle size={16} />
               </div>
               <span className="status-count">{metrics.statusSummary?.completed || 0}</span>
