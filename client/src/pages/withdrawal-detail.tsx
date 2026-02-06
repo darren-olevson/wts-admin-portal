@@ -67,6 +67,7 @@ type WithdrawalType = 'FULL' | 'PARTIAL';
 type ReconciliationStatus = 'MATCHED' | 'UNMATCHED' | 'EXCEPTION' | 'PENDING';
 
 interface ExtendedWithdrawal extends Withdrawal {
+  portfolioId?: string;
   correspondingTransfer?: CorrespondingTransfer;
   correspondingLiquidation?: CorrespondingLiquidation;
   auditLog?: AuditEntry[];
