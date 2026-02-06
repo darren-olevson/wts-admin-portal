@@ -797,7 +797,7 @@ export const mockUsers: HarborUser[] = [
     positions: 19.22,
     availableToWithdraw: 71.0,
     target: 1000.0,
-    portfolioType: 'Conservative',
+    sleeveType: 'Conservative',
     accountStatus: 'ACTIVE',
   },
   {
@@ -821,7 +821,7 @@ export const mockUsers: HarborUser[] = [
     positions: 8,
     availableToWithdraw: 2200.0,
     target: 5000.0,
-    portfolioType: 'Balanced',
+    sleeveType: 'Balanced',
     accountStatus: 'ACTIVE',
   },
   {
@@ -845,7 +845,7 @@ export const mockUsers: HarborUser[] = [
     positions: 4,
     availableToWithdraw: 420.0,
     target: 1500.0,
-    portfolioType: 'Growth',
+    sleeveType: 'Growth',
     accountStatus: 'ACTIVE',
   },
   {
@@ -869,7 +869,7 @@ export const mockUsers: HarborUser[] = [
     positions: 6,
     availableToWithdraw: 600.0,
     target: 2500.0,
-    portfolioType: 'Moderate',
+    sleeveType: 'Moderate',
     accountStatus: 'ACTIVE',
   },
   {
@@ -893,7 +893,7 @@ export const mockUsers: HarborUser[] = [
     positions: 9,
     availableToWithdraw: 2100.0,
     target: 7000.0,
-    portfolioType: 'Aggressive',
+    sleeveType: 'Aggressive',
     accountStatus: 'ACTIVE',
   },
 ];

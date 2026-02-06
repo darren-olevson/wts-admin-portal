@@ -304,7 +304,7 @@ export interface HarborUser {
   positions?: number;
   availableToWithdraw?: number;
   target?: number;
-  portfolioType?: string;
+  sleeveType?: string;
   accountStatus?: string;
 }
 
