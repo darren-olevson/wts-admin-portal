@@ -122,14 +122,14 @@ function WithdrawalDetail() {
       const isMatched = data.reconciliationStatus === 'MATCHED';
 
       // Determine transfer status based on withdrawal status
-      let transferStatus = 'PENDING';
+      let transferStatus: CorrespondingTransfer['status'] = 'PENDING';
       if (isCompleted) transferStatus = 'COMPLETED';
-      else if (isCancelled) transferStatus = 'CANCELLED';
+      else if (isCancelled) transferStatus = 'FAILED';
 
       // Determine liquidation status based on withdrawal status
-      let liquidationStatus = 'REQUESTED';
+      let liquidationStatus: CorrespondingLiquidation['status'] = 'REQUESTED';
       if (isCompleted) liquidationStatus = 'COMPLETED';
-      else if (isCancelled) liquidationStatus = 'CANCELLED';
+      else if (isCancelled) liquidationStatus = 'FAILED';
 
       const correspondingTransfer: CorrespondingTransfer = {
         id: Math.floor(Math.random() * 9000000 + 1000000).toString(),

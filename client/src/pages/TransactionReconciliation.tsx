@@ -2,11 +2,11 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Search, Filter, Calendar, RefreshCw, Download } from 'lucide-react';
 import { moneyMovementApi } from '../lib/api';
-import ReconciliationTable, { Transaction } from '../components/ReconciliationTable';
+import ReconciliationTable, { Transaction as ReconciliationTransaction } from '../components/ReconciliationTable';
 import './TransactionReconciliation.css';
 
 function TransactionReconciliation() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<ReconciliationTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -25,7 +25,20 @@ function TransactionReconciliation() {
         startDate: dateRange.start || undefined,
         endDate: dateRange.end || undefined,
       });
-      setTransactions(data);
+      // Map MoneyMovementTransaction to ReconciliationTransaction
+      const mapped: ReconciliationTransaction[] = data.map((tx) => ({
+        id: tx.id,
+        amount: tx.amount,
+        type: (tx.direction === 'CREDIT' ? 'credit' : 'debit') as 'credit' | 'debit',
+        effectiveDate: tx.effectiveDate,
+        postingDate: tx.postingDate,
+        sourceAccount: tx.sourceAccount,
+        destinationAccount: '',
+        status: (tx.reconciliationStatus?.toLowerCase() ?? 'unmatched') as 'matched' | 'unmatched' | 'exception',
+        description: `${tx.direction} transaction`,
+        referenceNumber: tx.id,
+      }));
+      setTransactions(mapped);
     } catch (error) {
       console.error('Error fetching transactions:', error);
     } finally {

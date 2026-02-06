@@ -38,8 +38,8 @@ const MOCK_PORTFOLIOS: Portfolio[] = [
     cashBalance: 15000,
     positionsValue: 6518,
     positions: [
-      { symbol: 'VTI', name: 'Vanguard Total Stock Market ETF', quantity: 25, price: 220.50, value: 5512.50, change: 2.3 },
-      { symbol: 'BND', name: 'Vanguard Total Bond Market ETF', quantity: 12, price: 83.75, value: 1005.00, change: -0.5 },
+      { symbol: 'VTI', name: 'Vanguard Total Stock Market ETF', quantity: 25, averageCost: 200.00, currentPrice: 220.50, marketValue: 5512.50, gainLoss: 512.50, gainLossPercent: 2.3 },
+      { symbol: 'BND', name: 'Vanguard Total Bond Market ETF', quantity: 12, averageCost: 85.00, currentPrice: 83.75, marketValue: 1005.00, gainLoss: -15.00, gainLossPercent: -0.5 },
     ],
     transactions: [
       { id: 'tx-1', date: '2026-02-03', buys: 2500, deposits: 5000 },
@@ -54,8 +54,8 @@ const MOCK_PORTFOLIOS: Portfolio[] = [
     cashBalance: 8500,
     positionsValue: 12350,
     positions: [
-      { symbol: 'BND', name: 'Vanguard Total Bond Market ETF', quantity: 80, price: 83.75, value: 6700.00, change: -0.5 },
-      { symbol: 'VTIP', name: 'Vanguard Short-Term Inflation-Protected', quantity: 50, price: 113.00, value: 5650.00, change: 0.2 },
+      { symbol: 'BND', name: 'Vanguard Total Bond Market ETF', quantity: 80, averageCost: 85.00, currentPrice: 83.75, marketValue: 6700.00, gainLoss: -100.00, gainLossPercent: -0.5 },
+      { symbol: 'VTIP', name: 'Vanguard Short-Term Inflation-Protected', quantity: 50, averageCost: 112.00, currentPrice: 113.00, marketValue: 5650.00, gainLoss: 50.00, gainLossPercent: 0.2 },
     ],
     transactions: [
       { id: 'tx-5', date: '2026-02-04', dividends: 125, interests: 35 },
@@ -69,8 +69,8 @@ const MOCK_PORTFOLIOS: Portfolio[] = [
     cashBalance: 3200,
     positionsValue: 28750,
     positions: [
-      { symbol: 'QQQ', name: 'Invesco QQQ Trust', quantity: 40, price: 450.25, value: 18010.00, change: 3.1 },
-      { symbol: 'ARKK', name: 'ARK Innovation ETF', quantity: 150, price: 71.60, value: 10740.00, change: 4.5 },
+      { symbol: 'QQQ', name: 'Invesco QQQ Trust', quantity: 40, averageCost: 430.00, currentPrice: 450.25, marketValue: 18010.00, gainLoss: 810.00, gainLossPercent: 3.1 },
+      { symbol: 'ARKK', name: 'ARK Innovation ETF', quantity: 150, averageCost: 68.00, currentPrice: 71.60, marketValue: 10740.00, gainLoss: 540.00, gainLossPercent: 4.5 },
     ],
     transactions: [
       { id: 'tx-8', date: '2026-02-05', buys: 8500, sells: 2200 },
