@@ -21,7 +21,7 @@ interface InvestActivityTableProps {
 }
 
 const formatCurrency = (value?: number) => {
-  if (value === undefined || value === null) return '-';
+  if (value === undefined || value === null || value === 0) return '-';
   return `$${value.toLocaleString()}`;
 };
 

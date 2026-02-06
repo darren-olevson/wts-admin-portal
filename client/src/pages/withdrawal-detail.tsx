@@ -16,7 +16,15 @@ import {
   Calendar,
   ArrowRight,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  FileText,
+  BarChart3,
+  Send,
+  Landmark,
+  ShieldCheck,
+  Ban,
+  RotateCw,
+  AlertTriangle,
 } from 'lucide-react';
 import WithdrawalRemediationDialog from '../components/WithdrawalRemediationDialog';
 import WithdrawalStatusBadge from '../components/WithdrawalStatusBadge';
@@ -98,6 +106,280 @@ function WithdrawalTypeBadge({ type }: { type?: WithdrawalType }) {
     </span>
   );
 }
+
+// ===== PIZZA TRACKER =====
+
+interface TrackerStep {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+  timestamp?: string;
+  state: 'completed' | 'current' | 'upcoming' | 'skipped' | 'failed' | 'warning';
+}
+
+function getLifecycleSteps(
+  achStatus: string,
+  liquidationStatus: string,
+  requestDate: string,
+  liquidationCreatedAt?: string,
+  transferCreatedAt?: string,
+  liquidationSkipped?: boolean,
+): TrackerStep[] {
+  const s = achStatus.toUpperCase();
+  const liq = liquidationStatus.toUpperCase();
+
+  // Terminal failure/cancellation — mark everything after the failure point
+  const isFailed = s === 'FAILED';
+  const isCancelled = s === 'CANCELLED';
+  const isTerminal = isFailed || isCancelled;
+
+  // Determine which phase the withdrawal is currently in
+  const phaseOrder = [
+    'PENDING_LIQUIDATION',
+    'CREATED',
+    'PROCESSING',
+    'PROCESSED',
+    'COMPLETE',
+    'RECONCILED',
+  ];
+
+  const currentPhaseIndex = phaseOrder.indexOf(s);
+
+  // Helper: is a given phase completed, current, or upcoming?
+  const phaseState = (phaseKey: string): 'completed' | 'current' | 'upcoming' | 'failed' | 'warning' => {
+    if (isTerminal) {
+      const idx = phaseOrder.indexOf(phaseKey);
+      if (idx < currentPhaseIndex || (idx <= currentPhaseIndex && idx >= 0)) return 'completed';
+      return 'upcoming';
+    }
+    const idx = phaseOrder.indexOf(phaseKey);
+    if (idx < 0) return 'upcoming';
+    if (idx < currentPhaseIndex) return 'completed';
+    if (idx === currentPhaseIndex) return 'current';
+    return 'upcoming';
+  };
+
+  // Special handling for RETRYING / STALE — they are variants of PROCESSING / COMPLETE
+  const isRetrying = s === 'RETRYING';
+  const isStale = s === 'STALE';
+
+  const steps: TrackerStep[] = [];
+
+  // Step 1: Withdrawal Created
+  steps.push({
+    key: 'created',
+    label: 'Withdrawal Created',
+    icon: <FileText size={18} />,
+    timestamp: requestDate,
+    state: 'completed', // always completed if we have a record
+  });
+
+  // Step 2: Liquidation
+  if (liquidationSkipped) {
+    steps.push({
+      key: 'liquidation',
+      label: 'Liquidation Skipped',
+      icon: <FastForward size={18} />,
+      timestamp: liquidationCreatedAt,
+      state: 'skipped',
+    });
+  } else {
+    const liqCompleted = ['COMPLETE', 'PROCESSED_SUCCESSFULLY'].includes(liq);
+    const liqPending = ['CREATED', 'PENDING'].includes(liq);
+    const liqFailed = liq === 'FAILED' || liq === 'CANCELLED';
+
+    let liqState: TrackerStep['state'] = 'upcoming';
+    if (liqCompleted) liqState = 'completed';
+    else if (liqPending && s === 'PENDING_LIQUIDATION') liqState = 'current';
+    else if (liqPending) liqState = 'upcoming';
+    else if (liqFailed) liqState = 'failed';
+
+    steps.push({
+      key: 'liquidation',
+      label: liqState === 'current' ? 'Liquidating Securities' : liqCompleted ? 'Liquidation Complete' : 'Pending Liquidation',
+      icon: <BarChart3 size={18} />,
+      timestamp: liquidationCreatedAt,
+      state: liqState,
+    });
+  }
+
+  // Step 3: Transfer Created (ACH queued)
+  {
+    let state = phaseState('CREATED');
+    if (isRetrying || isStale) state = 'completed'; // past CREATED
+    steps.push({
+      key: 'transfer_created',
+      label: 'Transfer Queued',
+      icon: <DollarSign size={18} />,
+      timestamp: transferCreatedAt,
+      state: isTerminal && currentPhaseIndex < phaseOrder.indexOf('CREATED') ? 'upcoming' : state,
+    });
+  }
+
+  // Step 4: Processing
+  {
+    let state = phaseState('PROCESSING');
+    if (isRetrying) state = 'warning'; // retrying is a sub-state of processing
+    else if (isStale) state = 'completed';
+    steps.push({
+      key: 'processing',
+      label: isRetrying ? 'Retrying' : 'ACH Processing',
+      icon: isRetrying ? <RotateCw size={18} /> : <Send size={18} />,
+      state: isTerminal && currentPhaseIndex < phaseOrder.indexOf('PROCESSING') ? 'upcoming' : state,
+    });
+  }
+
+  // Step 5: Complete (submitted to bank)
+  {
+    let state = phaseState('COMPLETE');
+    if (isStale) state = 'warning';
+    steps.push({
+      key: 'complete',
+      label: isStale ? 'Stale (Awaiting BOD)' : 'Transfer Complete',
+      icon: isStale ? <AlertTriangle size={18} /> : <Landmark size={18} />,
+      state: isTerminal && currentPhaseIndex < phaseOrder.indexOf('COMPLETE') ? 'upcoming' : state,
+    });
+  }
+
+  // Step 6: Reconciled
+  {
+    const state = phaseState('RECONCILED');
+    steps.push({
+      key: 'reconciled',
+      label: 'Reconciled',
+      icon: <ShieldCheck size={18} />,
+      state: isTerminal ? 'upcoming' : state,
+    });
+  }
+
+  // If terminal, add a final terminal step
+  if (isFailed) {
+    steps.push({
+      key: 'terminal',
+      label: 'Failed',
+      icon: <XCircle size={18} />,
+      state: 'failed',
+    });
+  } else if (isCancelled) {
+    steps.push({
+      key: 'terminal',
+      label: 'Cancelled',
+      icon: <Ban size={18} />,
+      state: 'failed',
+    });
+  }
+
+  return steps;
+}
+
+function formatDuration(startDate: string, endDate?: string): string {
+  const start = new Date(startDate);
+  const end = endDate ? new Date(endDate) : new Date();
+  const diffMs = end.getTime() - start.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+  const remainingHours = diffHours % 24;
+
+  if (diffDays > 0) {
+    return remainingHours > 0 ? `${diffDays}d ${remainingHours}h` : `${diffDays}d`;
+  }
+  if (diffHours > 0) return `${diffHours}h`;
+  const diffMin = Math.floor(diffMs / (1000 * 60));
+  return diffMin > 0 ? `${diffMin}m` : '<1m';
+}
+
+function WithdrawalLifecycleTracker({
+  achStatus,
+  liquidationStatus,
+  requestDate,
+  liquidationCreatedAt,
+  transferCreatedAt,
+  liquidationSkipped,
+}: {
+  achStatus: string;
+  liquidationStatus: string;
+  requestDate: string;
+  liquidationCreatedAt?: string;
+  transferCreatedAt?: string;
+  liquidationSkipped?: boolean;
+}) {
+  const steps = getLifecycleSteps(
+    achStatus,
+    liquidationStatus,
+    requestDate,
+    liquidationCreatedAt,
+    transferCreatedAt,
+    liquidationSkipped,
+  );
+
+  // Find current step index for progress bar
+  const currentIndex = steps.findIndex((s) => s.state === 'current' || s.state === 'warning');
+  const lastCompletedIndex = steps.reduce((acc, s, i) => (s.state === 'completed' || s.state === 'skipped' ? i : acc), -1);
+  const progressIndex = currentIndex >= 0 ? currentIndex : lastCompletedIndex;
+  const progressPercent = steps.length > 1 ? Math.min(100, ((progressIndex + (currentIndex >= 0 ? 0.5 : 1)) / (steps.length - 1)) * 100) : 100;
+
+  // Elapsed time from request to now or completion
+  const isTerminal = steps.some((s) => s.key === 'terminal');
+  const isFullyReconciled = steps.find((s) => s.key === 'reconciled')?.state === 'completed';
+  const totalElapsed = formatDuration(requestDate);
+
+  return (
+    <div className="lifecycle-tracker">
+      <div className="lifecycle-tracker-header">
+        <h2 className="card-title">Withdrawal Lifecycle</h2>
+        <span className="lifecycle-elapsed">
+          <Clock size={14} />
+          {isFullyReconciled || isTerminal ? 'Total time: ' : 'Elapsed: '}
+          {totalElapsed}
+        </span>
+      </div>
+
+      <div className="lifecycle-steps">
+        {/* Progress bar background */}
+        <div className="lifecycle-progress-track">
+          <div
+            className={`lifecycle-progress-fill ${isTerminal ? 'lifecycle-progress-terminal' : ''}`}
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+
+        {steps.map((step, i) => (
+          <div key={step.key} className={`lifecycle-step lifecycle-step--${step.state}`}>
+            <div className="lifecycle-step-node">
+              <div className={`lifecycle-node-circle lifecycle-node--${step.state}`}>
+                {step.state === 'completed' || step.state === 'skipped' ? (
+                  <CheckCircle2 size={16} />
+                ) : step.state === 'failed' ? (
+                  <XCircle size={16} />
+                ) : step.state === 'warning' ? (
+                  step.icon
+                ) : step.state === 'current' ? (
+                  <div className="lifecycle-pulse-dot" />
+                ) : (
+                  <span className="lifecycle-step-number">{i + 1}</span>
+                )}
+              </div>
+            </div>
+            <div className="lifecycle-step-content">
+              <span className="lifecycle-step-icon">{step.icon}</span>
+              <span className="lifecycle-step-label">{step.label}</span>
+              {step.timestamp && (
+                <span className="lifecycle-step-time">
+                  {new Date(step.timestamp).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ===== MAIN COMPONENT =====
 
 function WithdrawalDetail() {
   const { withdrawalId } = useParams<{ withdrawalId: string }>();
@@ -317,6 +599,18 @@ function WithdrawalDetail() {
             )}
           </div>
         )}
+      </div>
+
+      {/* Pizza Tracker - Withdrawal Lifecycle */}
+      <div className="detail-card lifecycle-card">
+        <WithdrawalLifecycleTracker
+          achStatus={withdrawal.status}
+          liquidationStatus={withdrawal.correspondingLiquidation?.status || 'CREATED'}
+          requestDate={withdrawal.requestDate}
+          liquidationCreatedAt={withdrawal.correspondingLiquidation?.createdAt}
+          transferCreatedAt={withdrawal.correspondingTransfer?.createdAt}
+          liquidationSkipped={withdrawal.liquidationSkipped}
+        />
       </div>
 
       <div className="withdrawal-main-grid">
