@@ -1,0 +1,155 @@
+.reconciliation-table-container {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.reconciliation-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.reconciliation-table thead {
+  background: #f8fafc;
+}
+
+.reconciliation-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.reconciliation-table td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.reconciliation-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.reconciliation-table tbody tr.clickable {
+  cursor: pointer;
+}
+
+.type-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.type-icon.credit {
+  color: #10b981;
+}
+
+.type-icon.debit {
+  color: #ef4444;
+}
+
+.type-label {
+  font-weight: 600;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.type-label.credit {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.type-label.debit {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.amount-cell {
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.amount-cell.credit {
+  color: #059669;
+}
+
+.amount-cell.debit {
+  color: #dc2626;
+}
+
+.description-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.recon-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.recon-status-badge.matched {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.recon-status-badge.unmatched {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.recon-status-badge.exception {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  color: #94a3b8;
+}
+
+.recon-loading-skeleton {
+  padding: 16px;
+}
+
+.skeleton-row {
+  height: 56px;
+  background: linear-gradient(90deg, #f8f8f8 25%, #f0f0f0 50%, #f8f8f8 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skeleton-row:last-child {
+  margin-bottom: 0;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

@@ -1,0 +1,209 @@
+.transaction-activity-table {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.date-range-filters {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.date-range-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.date-input {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.export-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.export-button:hover {
+  background: #2563eb;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.transaction-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transaction-table thead {
+  background-color: #f8fafc;
+}
+
+.transaction-table th {
+  padding: 12px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.transaction-table td {
+  padding: 12px;
+  font-size: 14px;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.transaction-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.transaction-table tbody tr.withdrawal-related {
+  background-color: #fef3c7;
+}
+
+.transaction-table tbody tr.withdrawal-related:hover {
+  background-color: #fde68a;
+}
+
+.code-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.code-cr {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.code-buy {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.code-sel {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.code-dr {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.code-default {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.amount-positive {
+  color: #059669;
+  font-weight: 500;
+}
+
+.amount-negative {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.transaction-table-loading,
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  color: #94a3b8;
+}
+
+/* Pagination */
+.tx-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.tx-pagination-info {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.tx-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tx-pagination-btn {
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tx-pagination-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.tx-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tx-pagination-pages {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
+  padding: 0 10px;
+}
+
+@media (max-width: 768px) {
+  .tx-pagination {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}

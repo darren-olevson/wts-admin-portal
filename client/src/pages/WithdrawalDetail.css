@@ -1,0 +1,893 @@
+.withdrawal-detail {
+  max-width: 1400px;
+  padding-bottom: 40px;
+}
+
+/* Back Button */
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.back-button:hover {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+/* Loading & Error States */
+.withdrawal-detail-loading,
+.withdrawal-detail-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  font-size: 18px;
+  color: #64748b;
+}
+
+.withdrawal-detail-error {
+  color: #dc2626;
+}
+
+/* ===== HEADER ===== */
+.withdrawal-header {
+  background: white;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.withdrawal-id-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.withdrawal-id {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.header-badges {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.withdrawal-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #64748b;
+  flex-wrap: wrap;
+}
+
+.meta-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.meta-link:hover {
+  text-decoration: underline;
+}
+
+.meta-separator {
+  color: #cbd5e1;
+}
+
+.meta-item {
+  color: #64748b;
+}
+
+/* Action Status Badges */
+.action-status-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.reprocessed-badge {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.reprocessed-badge:hover {
+  background: #bfdbfe;
+}
+
+.created-from-badge {
+  background: #e0e7ff;
+  color: #4338ca;
+  border: 1px solid #a5b4fc;
+}
+
+.created-from-badge:hover {
+  background: #c7d2fe;
+}
+
+.liquidation-skipped-badge {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+}
+
+/* ===== ACCOUNT SNAPSHOT ===== */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.metric-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.metric-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.metric-icon-equity {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.metric-icon-cash {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.metric-icon-positions {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.metric-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cash-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.cash-inline-label {
+  font-weight: 600;
+  color: #475569;
+}
+
+.cash-inline-value {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cash-inline-warning {
+  color: #b45309;
+}
+
+.cash-inline-divider {
+  color: #cbd5e1;
+}
+
+/* ===== CONTENT GRID ===== */
+.withdrawal-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.content-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ===== DETAIL CARD ===== */
+.detail-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 20px 0;
+}
+
+.detail-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row-highlight {
+  background: #f8fafc;
+  margin: 0 -24px;
+  padding: 14px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.detail-value-amount {
+  font-size: 18px;
+  color: #0f172a;
+}
+
+.detail-value-diff {
+  color: #b45309;
+}
+
+.detail-value-diff .variance {
+  font-size: 12px;
+  margin-left: 6px;
+  font-weight: 500;
+}
+
+.detail-value-warning {
+  color: #dc2626;
+}
+
+/* ===== FEASIBILITY SECTION ===== */
+.feasibility-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.subsection-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 12px 0;
+}
+
+.feasibility-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.feasibility-ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.feasibility-insufficient {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.feasibility-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comparison-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.comparison-row span:last-child {
+  font-weight: 600;
+  color: #334155;
+}
+
+/* ===== SEASONING CARD ===== */
+.seasoning-card {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+.seasoning-card-ok {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.seasoning-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #92400e;
+  margin-bottom: 16px;
+}
+
+.seasoning-card-ok .seasoning-header {
+  color: #166534;
+}
+
+.seasoning-header .card-title {
+  margin: 0;
+  color: inherit;
+}
+
+.seasoning-summary {
+  font-size: 14px;
+  color: #78350f;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.seasoning-ok-text {
+  font-size: 14px;
+  color: #166534;
+  margin: 0;
+}
+
+.seasoning-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  padding: 12px 14px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+}
+
+.timeline-date {
+  font-size: 14px;
+  font-weight: 600;
+  color: #78350f;
+}
+
+.timeline-amount {
+  font-size: 14px;
+  font-weight: 700;
+  color: #92400e;
+  text-align: right;
+}
+
+.timeline-remaining {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: #a16207;
+}
+
+.deposit-details-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 0;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #92400e;
+  cursor: pointer;
+}
+
+.deposit-details-toggle:hover {
+  color: #78350f;
+}
+
+.deposit-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #fde68a;
+}
+
+.deposit-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #fde68a;
+}
+
+.deposit-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.deposit-date {
+  font-size: 13px;
+  font-weight: 600;
+  color: #78350f;
+}
+
+.deposit-amount {
+  font-size: 13px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.deposit-progress {
+  height: 4px;
+  background: #fde68a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.deposit-progress-bar {
+  height: 100%;
+  background: #f59e0b;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.deposit-remaining {
+  font-size: 11px;
+  color: #a16207;
+}
+
+/* ===== RELATED RECORDS ===== */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 20px 0;
+}
+
+.related-records-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.record-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.record-type {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.record-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.record-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.record-row span:first-child {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.record-row span:last-child {
+  color: #0f172a;
+  font-weight: 600;
+  text-align: right;
+}
+
+.mono {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+  font-size: 12px;
+}
+
+.truncate {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== STATUS PILLS ===== */
+.status-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.status-pill.completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-pill.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-pill.requested {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-pill.processing {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.status-pill.failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-pill.cancelled {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Type Badge */
+.type-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.type-badge.full {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.type-badge.partial {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+/* ===== AUDIT SECTION ===== */
+.audit-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+}
+
+.audit-trail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.audit-entry {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.audit-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.audit-action-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.audit-action-badge.action-cancel {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.audit-action-badge.action-reprocess {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.audit-action-badge.action-skip_liquidation {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.audit-timestamp {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.audit-entry-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.audit-performer {
+  font-size: 13px;
+  color: #475569;
+}
+
+.audit-performer strong {
+  color: #0f172a;
+}
+
+.audit-status-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+  padding: 4px 8px;
+  background: white;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.audit-notes {
+  font-size: 13px;
+  color: #334155;
+  padding: 10px 12px;
+  background: white;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+  line-height: 1.5;
+}
+
+/* ===== REMEDIATION SECTION ===== */
+.remediation-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.remediation-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-button-cancel {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.action-button-cancel:hover {
+  background-color: #fecaca;
+}
+
+.action-button-reprocess {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.action-button-reprocess:hover {
+  background-color: #bfdbfe;
+}
+
+/* ===== WITHDRAWAL TYPE BADGE ===== */
+.withdrawal-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.type-full {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.type-partial {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+/* ===== RECONCILIATION BADGE ===== */
+.recon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.recon-matched {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.recon-unmatched {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.recon-exception {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.recon-pending {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .withdrawal-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .related-records-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .withdrawal-id-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-badges {
+    margin-top: 8px;
+  }
+
+  .withdrawal-id {
+    font-size: 22px;
+  }
+
+  .metric-value {
+    font-size: 16px;
+  }
+}

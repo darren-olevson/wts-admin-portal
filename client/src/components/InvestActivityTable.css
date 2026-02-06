@@ -1,0 +1,67 @@
+.invest-activity-table {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.invest-table-header {
+  padding: 20px 24px 0 24px;
+}
+
+.invest-table-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.invest-table-container {
+  overflow-x: auto;
+  padding: 16px 24px 24px 24px;
+}
+
+.invest-table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.invest-table-container th {
+  text-align: left;
+  color: #64748b;
+  font-weight: 600;
+  padding: 12px 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.invest-table-container td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+.invest-table-container th.summary-col,
+.invest-table-container td.summary-col {
+  background: #f8fafc;
+  border-left: 1px solid #e2e8f0;
+}
+
+.invest-table-container td.summary-col {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.invest-table-container tbody tr:hover {
+  background: #f8fafc;
+}
+
+.negative-value {
+  color: #dc2626;
+}
+
+.empty-state {
+  text-align: center;
+  color: #94a3b8;
+  padding: 24px;
+}

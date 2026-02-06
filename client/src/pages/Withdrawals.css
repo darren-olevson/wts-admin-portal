@@ -1,0 +1,644 @@
+.withdrawals {
+  max-width: 1400px;
+}
+
+.withdrawals-header {
+  margin-bottom: var(--space-lg);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: var(--radius-lg);
+  color: white;
+}
+
+.withdrawals-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 var(--space-xs) 0;
+  color: var(--text);
+}
+
+.withdrawals-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Skeleton Loading */
+.skeleton-title-large {
+  width: 200px;
+  height: 32px;
+  background: linear-gradient(90deg, var(--border-light) 25%, var(--border) 50%, var(--border-light) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.skeleton-subtitle {
+  width: 280px;
+  height: 18px;
+  background: linear-gradient(90deg, var(--border-light) 25%, var(--border) 50%, var(--border-light) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-filters {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.skeleton-input-large {
+  flex: 1;
+  height: 44px;
+  background: linear-gradient(90deg, var(--border-light) 25%, var(--border) 50%, var(--border-light) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-input {
+  width: 180px;
+  height: 44px;
+  background: linear-gradient(90deg, var(--border-light) 25%, var(--border) 50%, var(--border-light) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-table {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.skeleton-row {
+  height: 56px;
+  background: linear-gradient(90deg, var(--bg) 25%, var(--border-light) 50%, var(--bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.skeleton-row:last-child {
+  margin-bottom: 0;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Filters */
+.withdrawals-filters {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 280px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--muted);
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 12px 10px 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  background: var(--surface);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--text-secondary);
+}
+
+.filter-select {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  background: var(--surface);
+  cursor: pointer;
+  min-width: 160px;
+  transition: border-color var(--transition-base);
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.filter-input {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  width: 140px;
+  background: var(--surface);
+  transition: border-color var(--transition-base);
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Table */
+.withdrawals-table-container {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  -webkit-overflow-scrolling: touch;
+}
+
+.withdrawals-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.withdrawals-table thead {
+  background-color: var(--bg);
+}
+
+.withdrawals-table th {
+  padding: 14px var(--space-md);
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+}
+
+.withdrawals-table td {
+  padding: 14px var(--space-md);
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* Keep Actions column always visible */
+.withdrawals-table th:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  background-color: var(--bg);
+  box-shadow: inset 1px 0 0 var(--border);
+}
+
+.withdrawals-table td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  background-color: var(--surface);
+  box-shadow: inset 1px 0 0 var(--border-light);
+}
+
+.withdrawals-table tbody tr:hover td:last-child {
+  background-color: var(--surface-hover);
+}
+
+.withdrawals-table tbody tr:hover {
+  background-color: var(--surface-hover);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.amount {
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.client-name {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.client-id {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.type-badge.full {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.type-badge.partial {
+  background: var(--warning-soft);
+  color: #92400e;
+}
+
+.days-pending {
+  font-weight: 500;
+}
+
+.days-pending.warning {
+  color: var(--error);
+  font-weight: 600;
+  background: var(--error-soft);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.reconciliation-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.reconciliation-badge.matched {
+  background: var(--success-soft);
+  color: #065f46;
+}
+
+.reconciliation-badge.unmatched {
+  background: var(--warning-soft);
+  color: #92400e;
+}
+
+.reconciliation-badge.exception {
+  background: var(--error-soft);
+  color: #991b1b;
+}
+
+/* Liquidation and Transfer Status Badges */
+.status-badge-inline {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Liquidation Status */
+.liquidation-pending {
+  background: var(--warning-soft);
+  color: #92400e;
+}
+
+.liquidation-completed {
+  background: var(--success-soft);
+  color: #065f46;
+}
+
+.liquidation-failed {
+  background: var(--error-soft);
+  color: #991b1b;
+}
+
+.liquidation-na {
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+}
+
+/* Transfer Status */
+.transfer-pending {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.transfer-completed {
+  background: var(--success-soft);
+  color: #065f46;
+}
+
+.transfer-failed {
+  background: var(--error-soft);
+  color: #991b1b;
+}
+
+.transfer-na {
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+}
+
+.view-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 13px;
+  transition: color var(--transition-fast);
+}
+
+.view-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-xl);
+  color: var(--muted);
+}
+
+.empty-state .empty-icon {
+  color: var(--border);
+  margin-bottom: var(--space-md);
+}
+
+.empty-state p {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0 0 6px 0;
+}
+
+.empty-state span {
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .withdrawals-filters {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .search-box {
+    min-width: 100%;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-select,
+  .filter-input {
+    flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .withdrawals-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .withdrawals-header {
+    margin-bottom: var(--space-md);
+  }
+
+  .withdrawals-filters {
+    margin-bottom: var(--space-md);
+  }
+}
+
+/* Actions Cell */
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.actions-menu-container {
+  position: relative;
+}
+
+.actions-menu-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.actions-menu-trigger:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: var(--border-dark);
+}
+
+.actions-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  min-width: 140px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.action-item {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.action-item:hover {
+  background: var(--surface-hover);
+}
+
+.action-item.action-cancel {
+  color: #dc2626;
+}
+
+.action-item.action-cancel:hover {
+  background: #fef2f2;
+}
+
+.action-item.action-reprocess {
+  color: #059669;
+}
+
+.action-item.action-reprocess:hover {
+  background: #ecfdf5;
+}
+
+.action-item.action-skip {
+  color: #d97706;
+}
+
+.action-item.action-skip:hover {
+  background: #fffbeb;
+}
+
+/* Withdrawal ID cell with indicators */
+.withdrawal-id-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reprocessed-indicator,
+.from-reprocess-indicator,
+.skipped-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  cursor: help;
+}
+
+.reprocessed-indicator {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+}
+
+.from-reprocess-indicator {
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  color: #4338ca;
+}
+
+.skipped-indicator {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #b45309;
+}
+
+/* Clickable row */
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.clickable-row:hover {
+  background-color: var(--surface-hover, #f8fafc);
+}
+
+/* Withdrawal ID link */
+.withdrawal-id-link {
+  color: var(--primary, #3b82f6);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.withdrawal-id-link:hover {
+  color: var(--primary-dark, #2563eb);
+  text-decoration: underline;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--surface, white);
+  border-radius: 0 0 var(--radius-lg, 12px) var(--radius-lg, 12px);
+  border-top: 1px solid var(--border, #e2e8f0);
+  margin-top: -1px;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text, #1e293b);
+  background: var(--surface, white);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--surface-hover, #f8fafc);
+  border-color: var(--border-dark, #cbd5e1);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-pages {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text, #1e293b);
+  padding: 0 12px;
+}

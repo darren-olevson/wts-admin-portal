@@ -1,0 +1,29 @@
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg);
+}
+
+.main-content {
+  flex: 1;
+  padding: var(--space-lg);
+  margin-left: 260px;
+  background-color: var(--bg);
+  min-height: 100vh;
+}
+
+/* Optional content container for max-width pages */
+.content-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: var(--space-md);
+  }
+}
