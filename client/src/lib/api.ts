@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as mock from './mockData';
 
 const api = axios.create({
   baseURL: '/api',
@@ -6,6 +7,19 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+/** Returns true when the backend API is unavailable (e.g. static Vercel deploy). */
+let _useClientMock: boolean | null = null;
+async function shouldUseMock(): Promise<boolean> {
+  if (_useClientMock !== null) return _useClientMock;
+  try {
+    await api.get('/dashboard/metrics', { timeout: 3000 });
+    _useClientMock = false;
+  } catch {
+    _useClientMock = true;
+  }
+  return _useClientMock;
+}
 
 // Audit trail entry for tracking withdrawal actions
 export interface AuditEntry {
@@ -247,16 +261,32 @@ export const withdrawalsApi = {
     minDaysPending?: number;
     maxDaysPending?: number;
   }): Promise<Withdrawal[]> => {
+    if (await shouldUseMock()) {
+      let data = [...mock.mockWithdrawals];
+      if (filters?.accountId) data = data.filter(w => w.accountId === filters.accountId);
+      if (filters?.clientId) data = data.filter(w => w.clientId === filters.clientId);
+      if (filters?.status) data = data.filter(w => w.status === filters.status);
+      if (filters?.minDaysPending) data = data.filter(w => w.daysPending >= filters.minDaysPending!);
+      return data;
+    }
     const response = await api.get('/withdrawals', { params: filters });
     return response.data;
   },
 
   get: async (withdrawalId: string): Promise<Withdrawal> => {
+    if (await shouldUseMock()) {
+      const w = mock.mockWithdrawals.find(w => w.id === withdrawalId);
+      if (w) return w;
+      return mock.mockWithdrawals[0];
+    }
     const response = await api.get(`/withdrawals/${withdrawalId}`);
     return response.data;
   },
 
   getAged: async (thresholdDays: number = 6): Promise<Withdrawal[]> => {
+    if (await shouldUseMock()) {
+      return mock.mockWithdrawals.filter(w => w.daysPending > thresholdDays);
+    }
     const response = await api.get('/withdrawals/aged', {
       params: { thresholdDays },
     });
@@ -264,26 +294,34 @@ export const withdrawalsApi = {
   },
 
   getAccountActivity: async (withdrawalId: string): Promise<Transaction[]> => {
+    if (await shouldUseMock()) {
+      const w = mock.mockWithdrawals.find(w => w.id === withdrawalId);
+      return mock.mockAccountTransactions[w?.accountId ?? 'ACC-12345'] ?? [];
+    }
     const response = await api.get(`/withdrawals/${withdrawalId}/account-activity`);
     return response.data;
   },
 
-  cancel: async (withdrawalId: string, notes: string): Promise<void> => {
-    await api.post(`/withdrawals/${withdrawalId}/cancel`, { notes });
+  cancel: async (_withdrawalId: string, _notes: string): Promise<void> => {
+    if (await shouldUseMock()) return;
+    await api.post(`/withdrawals/${_withdrawalId}/cancel`, { notes: _notes });
   },
 
-  reprocess: async (withdrawalId: string, notes: string): Promise<void> => {
-    await api.post(`/withdrawals/${withdrawalId}/reprocess`, { notes });
+  reprocess: async (_withdrawalId: string, _notes: string): Promise<void> => {
+    if (await shouldUseMock()) return;
+    await api.post(`/withdrawals/${_withdrawalId}/reprocess`, { notes: _notes });
   },
 
-  skipLiquidation: async (withdrawalId: string, notes: string): Promise<void> => {
-    await api.post(`/withdrawals/${withdrawalId}/skip-liquidation`, { notes });
+  skipLiquidation: async (_withdrawalId: string, _notes: string): Promise<void> => {
+    if (await shouldUseMock()) return;
+    await api.post(`/withdrawals/${_withdrawalId}/skip-liquidation`, { notes: _notes });
   },
 };
 
 // Dashboard API
 export const dashboardApi = {
   getMetrics: async (): Promise<DashboardMetrics> => {
+    if (await shouldUseMock()) return mock.mockDashboardMetrics;
     const response = await api.get('/dashboard/metrics');
     return response.data;
   },
@@ -292,16 +330,25 @@ export const dashboardApi = {
 // Accounts API
 export const accountsApi = {
   getBalance: async (accountId: string): Promise<SeasonedCashData> => {
+    if (await shouldUseMock()) {
+      return mock.mockSeasonedCash[accountId] ?? mock.mockSeasonedCash['ACC-12345'];
+    }
     const response = await api.get(`/accounts/${accountId}/balance`);
     return response.data;
   },
 
   getOverview: async (accountId: string): Promise<AccountOverview> => {
+    if (await shouldUseMock()) {
+      return mock.mockAccountOverviews[accountId] ?? mock.mockAccountOverviews['ACC-12345'];
+    }
     const response = await api.get(`/accounts/${accountId}/overview`);
     return response.data;
   },
 
   getPositions: async (accountId: string): Promise<Position[]> => {
+    if (await shouldUseMock()) {
+      return mock.mockPositions[accountId] ?? [];
+    }
     const response = await api.get(`/accounts/${accountId}/positions`);
     return response.data;
   },
@@ -311,6 +358,9 @@ export const accountsApi = {
     startDate?: string,
     endDate?: string
   ): Promise<Transaction[]> => {
+    if (await shouldUseMock()) {
+      return mock.mockAccountTransactions[accountId] ?? [];
+    }
     const response = await api.get(`/accounts/${accountId}/transactions`, {
       params: { startDate, endDate },
     });
@@ -321,21 +371,42 @@ export const accountsApi = {
 // Users API
 export const usersApi = {
   search: async (query: string): Promise<User[]> => {
+    if (await shouldUseMock()) {
+      const q = query.toLowerCase();
+      return mock.mockUsers.filter(u =>
+        u.displayName?.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.id.toLowerCase().includes(q) ||
+        u.accountId.toLowerCase().includes(q)
+      );
+    }
     const response = await api.get('/users/search', { params: { q: query } });
     return response.data;
   },
 
   get: async (userId: string): Promise<User> => {
+    if (await shouldUseMock()) {
+      return mock.mockUsers.find(u => u.id === userId) ?? mock.mockUsers[0];
+    }
     const response = await api.get(`/users/${userId}`);
     return response.data;
   },
 
   getAccountSummary: async (userId: string): Promise<AccountSummary> => {
+    if (await shouldUseMock()) {
+      return mock.mockAccountSummaries[userId] ?? { accountId: 'ACC-12345' };
+    }
     const response = await api.get(`/users/${userId}/account-summary`);
     return response.data;
   },
 
   getDocuments: async (userId: string): Promise<UserDocument[]> => {
+    if (await shouldUseMock()) {
+      return mock.mockDocuments.filter(d => {
+        const user = mock.mockUsers.find(u => u.id === userId);
+        return user ? d.accountId === user.accountId : true;
+      });
+    }
     const response = await api.get(`/users/${userId}/documents`);
     return response.data;
   },
@@ -344,6 +415,12 @@ export const usersApi = {
 // Documents API
 export const documentsApi = {
   list: async (filters?: DocumentsFilter): Promise<UserDocument[]> => {
+    if (await shouldUseMock()) {
+      let docs = [...mock.mockDocuments];
+      if (filters?.accountId) docs = docs.filter(d => d.accountId === filters.accountId);
+      if (filters?.type) docs = docs.filter(d => d.type === filters.type);
+      return docs;
+    }
     const response = await api.get('/documents', { params: filters });
     return response.data;
   },
@@ -399,6 +476,7 @@ export const documentsApi = {
 // Money Movement API
 export const moneyMovementApi = {
   getStats: async (): Promise<MoneyMovementStats> => {
+    if (await shouldUseMock()) return mock.mockMoneyMovementStats;
     const response = await api.get('/money-movement/stats');
     return response.data;
   },
@@ -410,6 +488,7 @@ export const moneyMovementApi = {
     endDate?: string;
     accountId?: string;
   }): Promise<MoneyMovementTransaction[]> => {
+    if (await shouldUseMock()) return mock.mockMoneyMovementTransactions;
     const response = await api.get('/money-movement/transactions', { params: filters });
     return response.data;
   },
@@ -421,6 +500,7 @@ export const moneyMovementApi = {
     status?: string;
     reconciliationStatus?: string;
   }): Promise<MoneyMovementTransaction[]> => {
+    if (await shouldUseMock()) return mock.mockMoneyMovementTransactions;
     const response = await api.get('/money-movement/transactions', { params: filters });
     return response.data;
   },
@@ -431,6 +511,7 @@ export const moneyMovementApi = {
     endDate?: string;
     limit?: number;
   }): Promise<DailyBalance[]> => {
+    if (await shouldUseMock()) return mock.mockDailyBalances;
     const response = await api.get('/money-movement/balances', { params: filters });
     return response.data;
   },
@@ -440,6 +521,7 @@ export const moneyMovementApi = {
     startDate?: string;
     endDate?: string;
   }): Promise<MoneyMovementBalance[]> => {
+    if (await shouldUseMock()) return [];
     const response = await api.get('/money-movement/balances', { params: filters });
     return response.data;
   },
