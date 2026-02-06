@@ -4,6 +4,7 @@
   "description": "WTS Admin Portal for managing Invest withdrawal issues and compliance document access",
   "main": "server/index.js",
   "scripts": {
+    "postinstall": "npm install --prefix client && npm install --prefix server",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
