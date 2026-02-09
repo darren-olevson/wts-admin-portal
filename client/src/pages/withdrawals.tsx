@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Filter, Wallet, AlertCircle, RefreshCw, FastForward } from 'lucide-react';
+import { Search, Filter, Wallet, AlertCircle, RefreshCw, FastForward, StickyNote } from 'lucide-react';
 import { withdrawalsApi } from '../lib/api';
+import { hasWithdrawalNotes } from '../lib/withdrawalNotes';
 import './Withdrawals.css';
 
 interface Withdrawal {
@@ -34,7 +35,6 @@ function Withdrawals() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
   const [minDaysPending, setMinDaysPending] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -63,7 +63,7 @@ function Withdrawals() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, statusFilter, typeFilter, minDaysPending]);
+  }, [searchQuery, statusFilter, minDaysPending]);
 
   const fetchWithdrawals = useCallback(async () => {
     try {
@@ -71,7 +71,6 @@ function Withdrawals() {
         const data = await withdrawalsApi.list({
           status: statusFilter !== 'all' ? statusFilter : undefined,
           search: searchQuery || undefined,
-          withdrawalType: typeFilter !== 'all' ? typeFilter : undefined,
           minDaysPending: minDaysPending ? Number(minDaysPending) : undefined,
         });
       setWithdrawals(data);
@@ -80,7 +79,7 @@ function Withdrawals() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, searchQuery, typeFilter, minDaysPending]);
+  }, [statusFilter, searchQuery, minDaysPending]);
 
   useEffect(() => {
     fetchWithdrawals();
@@ -197,17 +196,6 @@ function Withdrawals() {
           </select>
         </div>
         <div className="filter-group">
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Types</option>
-            <option value="FULL">Full</option>
-            <option value="PARTIAL">Partial</option>
-          </select>
-        </div>
-        <div className="filter-group">
           <input
             type="number"
             min="0"
@@ -257,6 +245,11 @@ function Withdrawals() {
                     {withdrawal.liquidationSkipped && (
                       <span className="skipped-indicator" title="Liquidation was skipped">
                         <FastForward size={14} />
+                      </span>
+                    )}
+                    {hasWithdrawalNotes(withdrawal.id) && (
+                      <span className="note-indicator" title="Has notes">
+                        <StickyNote size={14} />
                       </span>
                     )}
                   </td>

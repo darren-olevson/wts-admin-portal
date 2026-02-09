@@ -306,6 +306,18 @@
   color: #b45309;
 }
 
+.user-withdrawal-id-cell .note-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  cursor: help;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  color: #16a34a;
+}
+
 /* Pagination */
 .user-withdrawals-pagination {
   display: flex;

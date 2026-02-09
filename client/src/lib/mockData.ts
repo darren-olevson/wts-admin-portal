@@ -292,6 +292,11 @@ export const mockDashboardMetrics: DashboardMetrics = {
     completed: 3,
     failed: 1,
     retrying: 2,
+    completionBreakdown: {
+      under3: 58,
+      threeTo5: 29,
+      sixPlus: 13,
+    },
   },
 };
 

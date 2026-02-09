@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -25,6 +25,10 @@ import {
   Ban,
   RotateCw,
   AlertTriangle,
+  MessageSquarePlus,
+  Pencil,
+  Save,
+  Trash2,
 } from 'lucide-react';
 import WithdrawalRemediationDialog from '../components/WithdrawalRemediationDialog';
 import WithdrawalStatusBadge from '../components/WithdrawalStatusBadge';
@@ -69,6 +73,13 @@ interface SeasonedCashData {
     seasoningDate: string;
     businessDaysRemaining: number;
   }>;
+}
+
+interface WithdrawalNote {
+  id: string;
+  text: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 type WithdrawalType = 'FULL' | 'PARTIAL';
@@ -458,6 +469,74 @@ function WithdrawalDetail() {
   const [seasonedCashData, setSeasonedCashData] = useState<SeasonedCashData | null>(null);
   const [seasonedCashLoading, setSeasonedCashLoading] = useState(false);
   const [showDepositDetails, setShowDepositDetails] = useState(false);
+
+  // Notes state
+  const [notes, setNotes] = useState<WithdrawalNote[]>([]);
+  const [newNoteText, setNewNoteText] = useState('');
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editingNoteText, setEditingNoteText] = useState('');
+
+  const notesStorageKey = `withdrawal-notes-${withdrawalId}`;
+
+  const loadNotes = useCallback(() => {
+    try {
+      const stored = localStorage.getItem(notesStorageKey);
+      if (stored) {
+        setNotes(JSON.parse(stored));
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }, [notesStorageKey]);
+
+  const persistNotes = useCallback((updatedNotes: WithdrawalNote[]) => {
+    setNotes(updatedNotes);
+    localStorage.setItem(notesStorageKey, JSON.stringify(updatedNotes));
+  }, [notesStorageKey]);
+
+  const handleAddNote = () => {
+    const trimmed = newNoteText.trim();
+    if (!trimmed) return;
+    const now = new Date().toISOString();
+    const note: WithdrawalNote = {
+      id: `note-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      text: trimmed,
+      createdAt: now,
+      updatedAt: now,
+    };
+    persistNotes([note, ...notes]);
+    setNewNoteText('');
+  };
+
+  const handleSaveEdit = (noteId: string) => {
+    const trimmed = editingNoteText.trim();
+    if (!trimmed) return;
+    const updated = notes.map(n =>
+      n.id === noteId ? { ...n, text: trimmed, updatedAt: new Date().toISOString() } : n
+    );
+    persistNotes(updated);
+    setEditingNoteId(null);
+    setEditingNoteText('');
+  };
+
+  const handleDeleteNote = (noteId: string) => {
+    persistNotes(notes.filter(n => n.id !== noteId));
+  };
+
+  const startEditing = (note: WithdrawalNote) => {
+    setEditingNoteId(note.id);
+    setEditingNoteText(note.text);
+  };
+
+  const cancelEditing = () => {
+    setEditingNoteId(null);
+    setEditingNoteText('');
+  };
+
+  // Load notes on mount
+  useEffect(() => {
+    loadNotes();
+  }, [loadNotes]);
 
   const fetchWithdrawal = async () => {
     if (!withdrawalId) return;
@@ -925,6 +1004,111 @@ function WithdrawalDetail() {
           }}
         />
       )}
+
+      {/* ===== NOTES SECTION ===== */}
+      <div className="notes-section">
+        <h2 className="section-title">
+          <MessageSquarePlus size={18} />
+          Notes
+        </h2>
+
+        <div className="notes-compose">
+          <textarea
+            className="notes-textarea"
+            placeholder="Add a note about this withdrawal..."
+            value={newNoteText}
+            onChange={(e) => setNewNoteText(e.target.value)}
+            rows={3}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                handleAddNote();
+              }
+            }}
+          />
+          <div className="notes-compose-footer">
+            <span className="notes-hint">Press {navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}+Enter to save</span>
+            <button
+              className="notes-save-button"
+              onClick={handleAddNote}
+              disabled={!newNoteText.trim()}
+            >
+              <Save size={14} />
+              Save Note
+            </button>
+          </div>
+        </div>
+
+        {notes.length > 0 && (
+          <div className="notes-list">
+            {notes.map((note) => (
+              <div key={note.id} className="note-item">
+                {editingNoteId === note.id ? (
+                  <div className="note-editing">
+                    <textarea
+                      className="notes-textarea notes-textarea-edit"
+                      value={editingNoteText}
+                      onChange={(e) => setEditingNoteText(e.target.value)}
+                      rows={3}
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                          handleSaveEdit(note.id);
+                        }
+                        if (e.key === 'Escape') {
+                          cancelEditing();
+                        }
+                      }}
+                    />
+                    <div className="note-edit-actions">
+                      <button className="note-action-btn note-action-save" onClick={() => handleSaveEdit(note.id)}>
+                        <Save size={13} />
+                        Save
+                      </button>
+                      <button className="note-action-btn note-action-cancel" onClick={cancelEditing}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="note-content">
+                      <p className="note-text">{note.text}</p>
+                    </div>
+                    <div className="note-footer">
+                      <div className="note-timestamps">
+                        <span className="note-timestamp">
+                          <Clock size={12} />
+                          {new Date(note.createdAt).toLocaleString()}
+                        </span>
+                        {note.updatedAt !== note.createdAt && (
+                          <span className="note-timestamp note-edited">
+                            (edited {new Date(note.updatedAt).toLocaleString()})
+                          </span>
+                        )}
+                      </div>
+                      <div className="note-actions">
+                        <button className="note-icon-btn" onClick={() => startEditing(note)} title="Edit note">
+                          <Pencil size={14} />
+                        </button>
+                        <button className="note-icon-btn note-icon-btn-delete" onClick={() => handleDeleteNote(note.id)} title="Delete note">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {notes.length === 0 && (
+          <div className="notes-empty">
+            <FileText size={20} />
+            <span>No notes yet. Add one above.</span>
+          </div>
+        )}
+      </div>
 
     </div>
   );

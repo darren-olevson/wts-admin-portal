@@ -81,6 +81,11 @@ export interface DashboardMetrics {
     completed: number;
     failed: number;
     retrying: number;
+    completionBreakdown?: {
+      under3: number;
+      threeTo5: number;
+      sixPlus: number;
+    };
   };
 }
 
@@ -341,9 +346,9 @@ export const withdrawalsApi = {
 
 // Dashboard API
 export const dashboardApi = {
-  getMetrics: async (): Promise<DashboardMetrics> => {
+  getMetrics: async (params?: { startDate?: string; endDate?: string }): Promise<DashboardMetrics> => {
     if (await shouldUseMock()) return mock.mockDashboardMetrics;
-    const response = await api.get('/dashboard/metrics');
+    const response = await api.get('/dashboard/metrics', { params });
     return response.data;
   },
 

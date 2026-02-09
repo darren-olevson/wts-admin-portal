@@ -31,6 +31,11 @@ interface DashboardMetrics {
     failed: number;
     retrying: number;
     reconciliationPending?: number;
+    completionBreakdown?: {
+      under3: number;
+      threeTo5: number;
+      sixPlus: number;
+    };
   };
 }
 
@@ -102,7 +107,11 @@ function Dashboard() {
     const fetchMetrics = async () => {
       try {
         setLoading(true);
-        const data = await dashboardApi.getMetrics();
+        const data = await dashboardApi.getMetrics(
+          dateRange.start && dateRange.end
+            ? { startDate: dateRange.start, endDate: dateRange.end }
+            : undefined
+        );
         setMetrics({
           ...data,
           totalWithdrawalAmount: data.totalWithdrawalAmount ?? 0,
@@ -297,6 +306,40 @@ function Dashboard() {
                 <CheckCircle size={16} />
               </div>
               <span className="status-count">{metrics.statusSummary?.completed || 0}</span>
+              {metrics.statusSummary?.completionBreakdown && (
+                <div className="completion-breakdown">
+                  <div className="breakdown-row">
+                    <span className="breakdown-label">Under 3 days</span>
+                    <span className="breakdown-pct">{metrics.statusSummary.completionBreakdown.under3}%</span>
+                    <div className="breakdown-bar">
+                      <div
+                        className="breakdown-bar-fill fast"
+                        style={{ width: `${metrics.statusSummary.completionBreakdown.under3}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="breakdown-row">
+                    <span className="breakdown-label">3 – 5 days</span>
+                    <span className="breakdown-pct">{metrics.statusSummary.completionBreakdown.threeTo5}%</span>
+                    <div className="breakdown-bar">
+                      <div
+                        className="breakdown-bar-fill moderate"
+                        style={{ width: `${metrics.statusSummary.completionBreakdown.threeTo5}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="breakdown-row">
+                    <span className="breakdown-label">6+ days</span>
+                    <span className="breakdown-pct">{metrics.statusSummary.completionBreakdown.sixPlus}%</span>
+                    <div className="breakdown-bar">
+                      <div
+                        className="breakdown-bar-fill slow"
+                        style={{ width: `${metrics.statusSummary.completionBreakdown.sixPlus}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

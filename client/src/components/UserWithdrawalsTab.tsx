@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle, RefreshCw, FastForward } from 'lucide-react';
+import { PlusCircle, RefreshCw, FastForward, StickyNote } from 'lucide-react';
 import { Withdrawal, usersApi } from '../lib/api';
+import { hasWithdrawalNotes } from '../lib/withdrawalNotes';
 import WithdrawalRemediationDialog from './WithdrawalRemediationDialog';
 import './UserWithdrawalsTab.css';
 
@@ -163,6 +164,11 @@ function UserWithdrawalsTab({
                   {withdrawal.liquidationSkipped && (
                     <span className="skipped-indicator" title="Liquidation was skipped">
                       <FastForward size={14} />
+                    </span>
+                  )}
+                  {hasWithdrawalNotes(withdrawal.id) && (
+                    <span className="note-indicator" title="Has notes">
+                      <StickyNote size={14} />
                     </span>
                   )}
                 </td>
