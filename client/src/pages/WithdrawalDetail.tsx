@@ -457,7 +457,7 @@ function WithdrawalDetail() {
           <span className="meta-separator">•</span>
           <span className="meta-item">{withdrawal.accountId}</span>
           <span className="meta-separator">•</span>
-          <span className="meta-item">Sleeve: {withdrawal.sleeveId}</span>
+          <span className="meta-item">Sleeve: {withdrawal.sleeveId || 'SLV-' + withdrawal.accountId.slice(-5)}</span>
         </div>
         {(withdrawal.reprocessedToId || withdrawal.reprocessedFromId || withdrawal.liquidationSkipped) && (
           <div className="action-status-badges">
@@ -524,12 +524,12 @@ function WithdrawalDetail() {
                 </div>
               </div>
               <div className="metric-card">
-                <div className="metric-icon metric-icon-positions">
+                <div className={`metric-icon metric-icon-positions${(accountOverview?.positionsValue ?? 0) < 0 ? ' metric-icon-negative' : ''}`}>
                   <DollarSign size={16} />
                 </div>
                 <div className="metric-content">
                   <span className="metric-label">Positions Value</span>
-                  <span className="metric-value">
+                  <span className={`metric-value${(accountOverview?.positionsValue ?? 0) < 0 ? ' metric-value-negative' : ''}`}>
                     {accountOverviewLoading ? '...' : `$${(accountOverview?.positionsValue ?? 0).toLocaleString()}`}
                   </span>
                 </div>

@@ -4,7 +4,7 @@ import { Position } from './OpenPositions';
 import InvestActivityTable, { InvestActivityTransaction } from './InvestActivityTable';
 import './AccountOverview.css';
 
-interface Portfolio {
+interface Sleeve {
   id: string;
   name: string;
   cashBalance: number;
@@ -18,7 +18,7 @@ interface AccountOverviewData {
   accountHolderName: string;
   brokerageId: string;
   brokerageAccountNumber: string;
-  portfolioId: string;
+  sleeveId: string;
   fundingAccountId: string;
   accountStatus: 'active' | 'inactive' | 'pending' | 'closed';
   accountType: string;
@@ -30,11 +30,11 @@ interface AccountOverviewData {
   positions: Position[];
 }
 
-// Mock portfolios data
-const MOCK_PORTFOLIOS: Portfolio[] = [
+// Mock sleeves data
+const MOCK_SLEEVES: Sleeve[] = [
   {
-    id: 'PTF-12345',
-    name: 'Growth Portfolio',
+    id: 'SLV-12345',
+    name: 'Growth Sleeve',
     cashBalance: 15000,
     positionsValue: 6518,
     positions: [
@@ -49,8 +49,8 @@ const MOCK_PORTFOLIOS: Portfolio[] = [
     ],
   },
   {
-    id: 'PTF-67890',
-    name: 'Conservative Portfolio',
+    id: 'SLV-67890',
+    name: 'Conservative Sleeve',
     cashBalance: 8500,
     positionsValue: 12350,
     positions: [
@@ -64,7 +64,7 @@ const MOCK_PORTFOLIOS: Portfolio[] = [
     ],
   },
   {
-    id: 'PTF-11111',
+    id: 'SLV-11111',
     name: 'Aggressive Growth',
     cashBalance: 3200,
     positionsValue: 28750,
@@ -78,6 +78,18 @@ const MOCK_PORTFOLIOS: Portfolio[] = [
       { id: 'tx-10', date: '2026-01-31', sells: 3500, withdrawals: 3000 },
       { id: 'tx-11', date: '2026-01-29', buys: 12000 },
       { id: 'tx-12', date: '2026-01-27', deposits: 20000 },
+    ],
+  },
+  {
+    id: 'SLV-34567',
+    name: 'Oversold Sleeve',
+    cashBalance: 0,
+    positionsValue: -130.87,
+    positions: [
+      { symbol: 'GOOGL', name: 'Alphabet Inc.', quantity: -0.84, averageCost: 155.80, currentPrice: 155.80, marketValue: -130.87, gainLoss: 0, gainLossPercent: 0 },
+    ],
+    transactions: [
+      { id: 'tx-13', date: '2026-02-06', sells: 1246.40, withdrawals: 1377.27 },
     ],
   },
 ];
@@ -94,9 +106,9 @@ function AccountOverview({ accountId, userId, initialData, transactions = [] }: 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showUnseasonedDetails, setShowUnseasonedDetails] = useState(false);
-  const [portfolios] = useState<Portfolio[]>(MOCK_PORTFOLIOS);
-  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string>(MOCK_PORTFOLIOS[0].id);
-  const [displayedTransactions, setDisplayedTransactions] = useState<InvestActivityTransaction[]>(MOCK_PORTFOLIOS[0].transactions);
+  const [sleeves] = useState<Sleeve[]>(MOCK_SLEEVES);
+  const [selectedSleeveId, setSelectedSleeveId] = useState<string>(MOCK_SLEEVES[0].id);
+  const [displayedTransactions, setDisplayedTransactions] = useState<InvestActivityTransaction[]>(MOCK_SLEEVES[0].transactions);
   const [seasonedCash, setSeasonedCash] = useState<{
     totalBalance: number;
     availableBalance: number;
@@ -138,7 +150,7 @@ function AccountOverview({ accountId, userId, initialData, transactions = [] }: 
         setData({
           ...accountData,
           ...initialData,
-          portfolioId: accountData.portfolioId || initialData?.portfolioId || 'PTF-' + accountId.slice(-6).toUpperCase(),
+          sleeveId: accountData.sleeveId || initialData?.sleeveId || 'SLV-' + accountId.slice(-6).toUpperCase(),
           fundingAccountId: accountData.fundingAccountId || initialData?.fundingAccountId || 'FND-' + accountId.slice(-8).toUpperCase(),
         });
       } catch (err) {
@@ -146,39 +158,39 @@ function AccountOverview({ accountId, userId, initialData, transactions = [] }: 
         setError('Unable to load account overview');
         
         // Use mock data for development
-        const selectedPortfolio = MOCK_PORTFOLIOS.find(p => p.id === selectedPortfolioId) || MOCK_PORTFOLIOS[0];
+        const selectedSleeve = MOCK_SLEEVES.find(p => p.id === selectedSleeveId) || MOCK_SLEEVES[0];
         setData({
           accountId,
           accountHolderName: initialData?.accountHolderName || 'Account Holder',
           brokerageId: initialData?.brokerageId || 'BRK-' + accountId.slice(-6),
           brokerageAccountNumber: initialData?.brokerageAccountNumber || 'ACC-' + accountId.slice(-8),
-          portfolioId: selectedPortfolio.id,
+          sleeveId: selectedSleeve.id,
           fundingAccountId: initialData?.fundingAccountId || 'FND-' + accountId.slice(-8).toUpperCase(),
           accountStatus: initialData?.accountStatus || 'active',
           accountType: initialData?.accountType || 'Individual',
-          totalBalance: selectedPortfolio.cashBalance + selectedPortfolio.positionsValue,
-          cashBalance: selectedPortfolio.cashBalance,
-          positionsValue: selectedPortfolio.positionsValue,
+          totalBalance: selectedSleeve.cashBalance + selectedSleeve.positionsValue,
+          cashBalance: selectedSleeve.cashBalance,
+          positionsValue: selectedSleeve.positionsValue,
           openedDate: initialData?.openedDate || new Date().toISOString(),
           lastActivityDate: initialData?.lastActivityDate || new Date().toISOString(),
-          positions: selectedPortfolio.positions,
+          positions: selectedSleeve.positions,
         });
-        const unseasonedAmount = Math.round(selectedPortfolio.cashBalance * 0.13);
+        const unseasonedAmount = Math.round(selectedSleeve.cashBalance * 0.13);
         setSeasonedCash({
-          totalBalance: selectedPortfolio.cashBalance,
-          availableBalance: selectedPortfolio.cashBalance - unseasonedAmount,
+          totalBalance: selectedSleeve.cashBalance,
+          availableBalance: selectedSleeve.cashBalance - unseasonedAmount,
           unseasonedAmount: unseasonedAmount,
           nextSeasoningDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
           daysUntilSeasoned: 3,
         });
-        setDisplayedTransactions(selectedPortfolio.transactions);
+        setDisplayedTransactions(selectedSleeve.transactions);
       } finally {
         setLoading(false);
       }
     };
 
     fetchAccountData();
-  }, [accountId, initialData, selectedPortfolioId]);
+  }, [accountId, initialData, selectedSleeveId]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -320,22 +332,22 @@ function AccountOverview({ accountId, userId, initialData, transactions = [] }: 
                 Brokerage ID: {data.brokerageId}
               </span>
               <span className="meta-divider">|</span>
-              <span className="meta-item portfolio-selector">
-                <label htmlFor="portfolio-select">Portfolio:</label>
-                <div className="portfolio-dropdown-wrapper">
+              <span className="meta-item sleeve-selector">
+                <label htmlFor="sleeve-select">Sleeve:</label>
+                <div className="sleeve-dropdown-wrapper">
                   <select
-                    id="portfolio-select"
-                    value={selectedPortfolioId}
-                    onChange={(e) => setSelectedPortfolioId(e.target.value)}
-                    className="portfolio-dropdown"
+                    id="sleeve-select"
+                    value={selectedSleeveId}
+                    onChange={(e) => setSelectedSleeveId(e.target.value)}
+                    className="sleeve-dropdown"
                   >
-                    {portfolios.map((portfolio) => (
-                      <option key={portfolio.id} value={portfolio.id}>
-                        {portfolio.name} ({portfolio.id})
+                    {sleeves.map((sleeve) => (
+                      <option key={sleeve.id} value={sleeve.id}>
+                        {sleeve.name} ({sleeve.id})
                       </option>
                     ))}
                   </select>
-                  <ChevronDown size={14} className="portfolio-dropdown-icon" />
+                  <ChevronDown size={14} className="sleeve-dropdown-icon" />
                 </div>
               </span>
               <span className="meta-divider">|</span>
@@ -432,13 +444,15 @@ function AccountOverview({ accountId, userId, initialData, transactions = [] }: 
             )}
           </div>
         </div>
-        <div className="balance-card positions">
+        <div className={`balance-card positions${data.positionsValue < 0 ? ' negative' : ''}`}>
           <div className="balance-card-icon">
             <Building2 size={20} />
           </div>
           <div className="balance-card-content">
             <span className="balance-card-label">Positions Value</span>
-            <span className="balance-card-value">{formatCurrency(data.positionsValue)}</span>
+            <span className={`balance-card-value${data.positionsValue < 0 ? ' negative-value' : ''}`}>
+              {formatCurrency(data.positionsValue)}
+            </span>
           </div>
         </div>
       </div>

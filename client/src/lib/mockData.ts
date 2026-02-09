@@ -16,6 +16,7 @@ import type {
   Transaction,
   Position,
   SeasonedCashData,
+  NegativePosition,
 } from './api';
 
 // ── Withdrawals ──────────────────────────────────────────────
@@ -40,6 +41,7 @@ export const mockWithdrawals: Withdrawal[] = [
     brokerageAccountNumber: '73388424776947',
     brokerageId: 'BR-001',
     goalId: 'GOAL-456',
+    sleeveId: 'SLV-12345',
   },
   {
     id: 'WD-002',
@@ -60,6 +62,7 @@ export const mockWithdrawals: Withdrawal[] = [
     brokerageAccountNumber: 'BR-987654322',
     brokerageId: 'BR-002',
     goalId: 'GOAL-789',
+    sleeveId: 'SLV-23456',
   },
   {
     id: 'WD-003',
@@ -80,6 +83,7 @@ export const mockWithdrawals: Withdrawal[] = [
     brokerageAccountNumber: 'BR-987654323',
     brokerageId: 'BR-003',
     goalId: 'GOAL-012',
+    sleeveId: 'SLV-34567',
   },
   {
     id: 'WD-004',
@@ -100,6 +104,7 @@ export const mockWithdrawals: Withdrawal[] = [
     brokerageAccountNumber: 'BR-987654324',
     brokerageId: 'BR-004',
     goalId: 'GOAL-345',
+    sleeveId: 'SLV-45678',
   },
   {
     id: 'WD-005',
@@ -120,6 +125,7 @@ export const mockWithdrawals: Withdrawal[] = [
     brokerageAccountNumber: 'BR-987654325',
     brokerageId: 'BR-005',
     goalId: 'GOAL-678',
+    sleeveId: 'SLV-56789',
   },
   {
     id: 'WD-006',
@@ -140,6 +146,7 @@ export const mockWithdrawals: Withdrawal[] = [
     brokerageAccountNumber: 'BR-987654326',
     brokerageId: 'BR-006',
     goalId: 'GOAL-901',
+    sleeveId: 'SLV-67890',
   },
   {
     id: 'WD-007',
@@ -160,6 +167,7 @@ export const mockWithdrawals: Withdrawal[] = [
     brokerageAccountNumber: 'BR-987654327',
     brokerageId: 'BR-007',
     goalId: 'GOAL-234',
+    sleeveId: 'SLV-78901',
   },
   {
     id: 'WD-008',
@@ -180,6 +188,7 @@ export const mockWithdrawals: Withdrawal[] = [
     brokerageAccountNumber: 'BR-987654328',
     brokerageId: 'BR-008',
     goalId: 'GOAL-567',
+    sleeveId: 'SLV-89012',
   },
   {
     id: 'WD-009',
@@ -200,6 +209,7 @@ export const mockWithdrawals: Withdrawal[] = [
     brokerageAccountNumber: 'BR-987654329',
     brokerageId: 'BR-009',
     goalId: 'GOAL-890',
+    sleeveId: 'SLV-90123',
   },
   {
     id: 'WD-010',
@@ -220,6 +230,7 @@ export const mockWithdrawals: Withdrawal[] = [
     brokerageAccountNumber: 'BR-987654330',
     brokerageId: 'BR-010',
     goalId: 'GOAL-123',
+    sleeveId: 'SLV-01234',
   },
   {
     id: 'WD-011',
@@ -240,6 +251,7 @@ export const mockWithdrawals: Withdrawal[] = [
     brokerageAccountNumber: 'BR-987654331',
     brokerageId: 'BR-011',
     goalId: 'GOAL-456',
+    sleeveId: 'SLV-11234',
   },
   {
     id: 'WD-100',
@@ -260,6 +272,7 @@ export const mockWithdrawals: Withdrawal[] = [
     brokerageAccountNumber: '73388424776947',
     brokerageId: 'BR-001',
     goalId: 'GOAL-456',
+    sleeveId: 'SLV-12345',
   },
 ];
 
@@ -271,6 +284,8 @@ export const mockDashboardMetrics: DashboardMetrics = {
   totalUsers: 5670,
   withdrawalExceptions: 4,
   totalWithdrawalAmount: 125000,
+  negativePositionsSum: -347.62,
+  negativePositionsCount: 3,
   statusSummary: {
     pendingLiquidation: 3,
     transferPending: 2,
@@ -279,6 +294,35 @@ export const mockDashboardMetrics: DashboardMetrics = {
     retrying: 2,
   },
 };
+
+// ── Negative Positions ───────────────────────────────────────
+
+export const mockNegativePositions: NegativePosition[] = [
+  {
+    userId: 'CL-901',
+    userName: 'Robert Johnson',
+    sleeveId: 'SLV-34567',
+    symbol: 'GOOGL',
+    quantity: -0.84,
+    marketValue: -130.87,
+  },
+  {
+    userId: 'CL-012',
+    userName: 'Emily Davis',
+    sleeveId: 'SLV-45678',
+    symbol: 'VTI',
+    quantity: -0.52,
+    marketValue: -122.59,
+  },
+  {
+    userId: 'CL-234',
+    userName: 'Sarah Wilson',
+    sleeveId: 'SLV-67890',
+    symbol: 'BND',
+    quantity: -1.34,
+    marketValue: -94.16,
+  },
+];
 
 // ── Users ────────────────────────────────────────────────────
 
@@ -348,7 +392,7 @@ export const mockAccountSummaries: Record<string, AccountSummary> = {
     positions: 19.22,
     availableToWithdraw: 71.0,
     target: 1000.0,
-    portfolioType: 'Conservative',
+    sleeveType: 'Conservative',
     brokerageAccountNumber: '73388424776947',
     accountStatus: 'ACTIVE',
   },

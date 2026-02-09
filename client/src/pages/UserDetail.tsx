@@ -166,7 +166,8 @@ function UserDetail() {
     />
   );
   const selectedWithdrawalId = searchParams.get('withdrawalId');
-  const defaultTab = searchParams.get('tab') === 'withdrawals' ? 'withdrawals' : undefined;
+  const tabParam = searchParams.get('tab');
+  const defaultTab = tabParam === 'withdrawals' || tabParam === 'account-overview' ? tabParam : undefined;
   const withdrawalsTab = (
     <UserWithdrawalsTab
       withdrawals={withdrawals}

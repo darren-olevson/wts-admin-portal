@@ -1224,6 +1224,44 @@ export const mockUserDocuments: Array<{
   },
 ];
 
+// ── Negative Positions (oversold during liquidation) ─────────
+
+export interface NegativePosition {
+  userId: string;
+  userName: string;
+  sleeveId: string;
+  symbol: string;
+  quantity: number;
+  marketValue: number;
+}
+
+export const mockNegativePositions: NegativePosition[] = [
+  {
+    userId: 'CL-901',
+    userName: 'Robert Johnson',
+    sleeveId: 'SLV-34567',
+    symbol: 'GOOGL',
+    quantity: -0.84,
+    marketValue: -130.87,
+  },
+  {
+    userId: 'CL-012',
+    userName: 'Emily Davis',
+    sleeveId: 'SLV-45678',
+    symbol: 'VTI',
+    quantity: -0.52,
+    marketValue: -122.59,
+  },
+  {
+    userId: 'CL-234',
+    userName: 'Sarah Wilson',
+    sleeveId: 'SLV-67890',
+    symbol: 'BND',
+    quantity: -1.34,
+    marketValue: -94.16,
+  },
+];
+
 // Helper function to calculate days pending
 export function calculateDaysPending(requestDate: string): number {
   const request = new Date(requestDate);

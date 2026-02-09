@@ -141,6 +141,7 @@ export function convertHarborWithdrawalToUIFormat(
     brokerageAccountNumber: withdrawal.brokerageAccountNumber,
     brokerageId: withdrawal.brokerageId,
     goalId: withdrawal.goalId,
+    sleeveId: withdrawal.sleeveId || 'SLV-' + withdrawal.accountId.slice(-5).toUpperCase(),
     // Nested liquidation detail from EDD
     liquidation: withdrawal.liquidation,
     // Completion metrics

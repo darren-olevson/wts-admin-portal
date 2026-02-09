@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { dashboardApi } from '../lib/api';
 import AgedWithdrawalQueue from '../components/AgedWithdrawalQueue';
+import NegativePositionsCard from '../components/NegativePositionsCard';
 import './Dashboard.css';
 
 interface DashboardMetrics {
@@ -21,6 +22,8 @@ interface DashboardMetrics {
   totalUsers: number;
   withdrawalExceptions: number;
   totalWithdrawalAmount: number;
+  negativePositionsSum: number;
+  negativePositionsCount: number;
   statusSummary?: {
     pendingLiquidation: number;
     transferPending: number;
@@ -73,6 +76,8 @@ function Dashboard() {
     totalUsers: 0,
     withdrawalExceptions: 0,
     totalWithdrawalAmount: 0,
+    negativePositionsSum: 0,
+    negativePositionsCount: 0,
   });
   const [loading, setLoading] = useState(true);
   const [datePreset, setDatePreset] = useState<DatePreset>('30');
@@ -98,10 +103,11 @@ function Dashboard() {
       try {
         setLoading(true);
         const data = await dashboardApi.getMetrics();
-        // Add mock data for new metrics
         setMetrics({
           ...data,
           totalWithdrawalAmount: data.totalWithdrawalAmount ?? 0,
+          negativePositionsSum: data.negativePositionsSum ?? 0,
+          negativePositionsCount: data.negativePositionsCount ?? 0,
         });
       } catch (error) {
         console.error('Error fetching dashboard metrics:', error);
@@ -112,6 +118,8 @@ function Dashboard() {
           totalUsers: 15234,
           withdrawalExceptions: 12,
           totalWithdrawalAmount: 125000,
+          negativePositionsSum: -347.62,
+          negativePositionsCount: 3,
         });
       } finally {
         setLoading(false);
@@ -207,7 +215,7 @@ function Dashboard() {
       </div>
 
       {/* Key Metrics */}
-      <div className="metrics-grid">
+      <div className="metrics-grid metrics-grid-5">
         <div className="metric-card">
           <div className="metric-icon invested">
             <DollarSign size={24} />
@@ -252,6 +260,11 @@ function Dashboard() {
             <div className="metric-subtext">Completed withdrawals</div>
           </div>
         </div>
+
+        <NegativePositionsCard
+          sum={metrics.negativePositionsSum}
+          count={metrics.negativePositionsCount}
+        />
       </div>
 
       {/* Withdrawal Status Summary */}

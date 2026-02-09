@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { mockWithdrawals } from '../utils/mockData';
+import { mockWithdrawals, mockNegativePositions } from '../utils/mockData';
 import { convertHarborWithdrawalToUIFormat } from '../utils/harborConverters';
 
 const router = Router();
@@ -47,17 +47,36 @@ router.get('/metrics', async (req, res) => {
       ).length,
     };
 
+    // Calculate negative positions summary
+    const negativePositionsSum = mockNegativePositions.reduce(
+      (sum, p) => sum + p.marketValue,
+      0
+    );
+    const negativePositionsCount = mockNegativePositions.length;
+
     res.json({
       investedAmount: totalInvested,
       fundedAccounts,
       totalUsers,
       withdrawalExceptions,
       totalWithdrawalAmount,
+      negativePositionsSum,
+      negativePositionsCount,
       statusSummary,
     });
   } catch (error) {
     console.error('Error fetching dashboard metrics:', error);
     res.status(500).json({ error: 'Failed to fetch dashboard metrics' });
+  }
+});
+
+// GET /api/dashboard/negative-positions - Get list of negative positions for drill-down
+router.get('/negative-positions', async (req, res) => {
+  try {
+    res.json(mockNegativePositions);
+  } catch (error) {
+    console.error('Error fetching negative positions:', error);
+    res.status(500).json({ error: 'Failed to fetch negative positions' });
   }
 });
 

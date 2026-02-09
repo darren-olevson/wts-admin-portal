@@ -156,13 +156,14 @@ interface LifecycleTrackerProps {
   withdrawalId: string;
   achStatus: string;
   requestDate: string;
+  amount: number;
   liquidation?: CorrespondingLiquidation;
   transfer?: CorrespondingTransfer;
   liquidationSkipped?: boolean;
 }
 
 function buildLifecycleSteps(props: LifecycleTrackerProps): TrackerStep[] {
-  const { withdrawalId, achStatus, requestDate, liquidation, transfer, liquidationSkipped } = props;
+  const { withdrawalId, achStatus, requestDate, amount, liquidation, transfer, liquidationSkipped } = props;
   const s = achStatus.toUpperCase();
   const liq = (liquidation?.status || '').toUpperCase();
 
@@ -201,6 +202,9 @@ function buildLifecycleSteps(props: LifecycleTrackerProps): TrackerStep[] {
     recordLabel: 'Withdrawal ID',
     timestamp: requestDate,
     duration: liquidation?.createdAt ? formatDuration(requestDate, liquidation.createdAt) : undefined,
+    details: [
+      { label: 'Amount', value: `$${amount.toLocaleString()}` },
+    ],
   });
 
   // Step 2: Liquidation
@@ -350,6 +354,9 @@ function WithdrawalLifecycleTracker(props: LifecycleTrackerProps) {
   const isFullyReconciled = steps.find((s) => s.key === 'reconciled')?.state === 'completed';
   const totalElapsed = formatDuration(props.requestDate);
 
+  // Filter out terminal step for horizontal display (shown as a banner instead)
+  const displaySteps = steps.filter((s) => s.key !== 'terminal');
+
   return (
     <div className="lifecycle-tracker">
       <div className="lifecycle-tracker-header">
@@ -361,12 +368,19 @@ function WithdrawalLifecycleTracker(props: LifecycleTrackerProps) {
         </span>
       </div>
 
-      <div className="lifecycle-timeline">
-        {steps.map((step, i) => (
-          <div key={step.key} className={`lt-row lt-row--${step.state}`}>
-            {/* Left rail: node + connector */}
-            <div className="lt-rail">
-              <div className={`lt-node lt-node--${step.state}`}>
+      <div className="lt-horizontal">
+        {displaySteps.map((step, i) => {
+          const prevDone = i > 0 && (displaySteps[i - 1].state === 'completed' || displaySteps[i - 1].state === 'skipped');
+          const prevFailed = i > 0 && displaySteps[i - 1].state === 'failed';
+          return (
+            <div key={step.key} className={`lt-h-step lt-h-step--${step.state}`}>
+              {/* Connector line before (except first) */}
+              {i > 0 && (
+                <div className={`lt-h-connector ${prevDone ? 'lt-h-connector--done' : ''} ${prevFailed ? 'lt-h-connector--failed' : ''}`} />
+              )}
+
+              {/* Node circle */}
+              <div className={`lt-h-node lt-node--${step.state}`}>
                 {step.state === 'completed' || step.state === 'skipped' ? (
                   <CheckCircle2 size={16} />
                 ) : step.state === 'failed' ? (
@@ -379,75 +393,53 @@ function WithdrawalLifecycleTracker(props: LifecycleTrackerProps) {
                   <span className="lt-step-num">{i + 1}</span>
                 )}
               </div>
-              {i < steps.length - 1 && (
-                <div className={`lt-connector ${
-                  step.state === 'completed' || step.state === 'skipped' ? 'lt-connector--done' : ''
-                } ${step.state === 'failed' ? 'lt-connector--failed' : ''}`} />
-              )}
-            </div>
 
-            {/* Right content */}
-            <div className="lt-content">
-              <div className="lt-content-header">
-                <div className="lt-title-row">
-                  <span className="lt-icon">{step.icon}</span>
-                  <span className="lt-label">{step.label}</span>
-                  {step.status && (
-                    <span className={`lt-status-pill lt-status--${step.status.toLowerCase().replace(/\s+/g, '_')}`}>
-                      {step.status}
-                    </span>
-                  )}
-                </div>
+              {/* Label and info below the node */}
+              <div className="lt-h-content">
+                <span className="lt-h-icon">{step.icon}</span>
+                <span className="lt-h-label">{step.label}</span>
+                {step.status && (
+                  <span className={`lt-status-pill lt-status--${step.status.toLowerCase().replace(/\s+/g, '_')}`}>
+                    {step.status}
+                  </span>
+                )}
+                {step.timestamp && (
+                  <span className="lt-h-timestamp">
+                    {formatFullTimestamp(step.timestamp)}
+                  </span>
+                )}
+                {step.endTimestamp && (
+                  <span className="lt-h-timestamp lt-h-timestamp--end">
+                    → {formatFullTimestamp(step.endTimestamp)}
+                  </span>
+                )}
                 {step.duration && (
-                  <span className="lt-duration">
-                    <Clock size={12} />
+                  <span className="lt-h-duration">
+                    <Clock size={11} />
                     {step.duration}
                   </span>
                 )}
-              </div>
-
-              {/* Timestamp row */}
-              {(step.timestamp || step.endTimestamp) && (
-                <div className="lt-timestamp-row">
-                  {step.timestamp && (
-                    <span className="lt-timestamp">
-                      {formatFullTimestamp(step.timestamp)}
-                    </span>
-                  )}
-                  {step.endTimestamp && (
-                    <>
-                      <ArrowRight size={12} className="lt-timestamp-arrow" />
-                      <span className="lt-timestamp">
-                        {formatFullTimestamp(step.endTimestamp)}
+                {step.details && step.details.length > 0 && (
+                  <div className="lt-h-details">
+                    {step.details.map((d) => (
+                      <span key={d.label} className="lt-h-detail">
+                        <span className="lt-h-detail-label">{d.label}:</span> {d.value}
                       </span>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* Record ID */}
-              {step.recordId && (
-                <div className="lt-record-id">
-                  <span className="lt-record-label">{step.recordLabel}:</span>
-                  <span className="lt-record-value">{step.recordId}</span>
-                </div>
-              )}
-
-              {/* Detail rows */}
-              {step.details && step.details.length > 0 && (
-                <div className="lt-details">
-                  {step.details.map((d) => (
-                    <div key={d.label} className="lt-detail-item">
-                      <span className="lt-detail-label">{d.label}</span>
-                      <span className="lt-detail-value">{d.value}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      {isTerminal && (
+        <div className={`lt-terminal-banner lt-terminal-banner--${steps.find((s) => s.key === 'terminal')?.status?.toLowerCase()}`}>
+          <XCircle size={16} />
+          <span>{steps.find((s) => s.key === 'terminal')?.label}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -649,7 +641,7 @@ function WithdrawalDetail() {
           <span className="meta-separator">•</span>
           <span className="meta-item">{withdrawal.accountId}</span>
           <span className="meta-separator">•</span>
-          <span className="meta-item">Sleeve: {withdrawal.sleeveId}</span>
+          <span className="meta-item">Sleeve: {withdrawal.sleeveId || 'SLV-' + withdrawal.accountId.slice(-5)}</span>
         </div>
         {(withdrawal.reprocessedToId || withdrawal.reprocessedFromId || withdrawal.liquidationSkipped) && (
           <div className="action-status-badges">
@@ -681,6 +673,7 @@ function WithdrawalDetail() {
           withdrawalId={withdrawal.id}
           achStatus={withdrawal.status}
           requestDate={withdrawal.requestDate}
+          amount={withdrawal.amount}
           liquidation={withdrawal.correspondingLiquidation}
           transfer={withdrawal.correspondingTransfer}
           liquidationSkipped={withdrawal.liquidationSkipped}
@@ -715,12 +708,12 @@ function WithdrawalDetail() {
                 </div>
               </div>
               <div className="metric-card">
-                <div className="metric-icon metric-icon-positions">
+                <div className={`metric-icon metric-icon-positions${(accountOverview?.positionsValue ?? 0) < 0 ? ' metric-icon-negative' : ''}`}>
                   <DollarSign size={16} />
                 </div>
                 <div className="metric-content">
                   <span className="metric-label">Positions Value</span>
-                  <span className="metric-value">
+                  <span className={`metric-value${(accountOverview?.positionsValue ?? 0) < 0 ? ' metric-value-negative' : ''}`}>
                     {accountOverviewLoading ? '...' : `$${(accountOverview?.positionsValue ?? 0).toLocaleString()}`}
                   </span>
                 </div>
@@ -871,86 +864,6 @@ function WithdrawalDetail() {
             </div>
           </div>
 
-          {(withdrawal.correspondingTransfer || withdrawal.correspondingLiquidation) && (
-            <div className="detail-card related-card">
-              <h2 className="card-title">Related Records</h2>
-              <div className="related-records-grid">
-                {withdrawal.correspondingLiquidation && (
-                  <div className="record-card">
-                    <div className="record-header">
-                      <span className="record-type">Liquidation</span>
-                      <span className={`status-pill ${withdrawal.correspondingLiquidation.status.toLowerCase()}`}>
-                        {withdrawal.correspondingLiquidation.status}
-                      </span>
-                    </div>
-                    <div className="record-body">
-                      <div className="record-row">
-                        <span>ID</span>
-                        <span className="mono">{withdrawal.correspondingLiquidation.id}</span>
-                      </div>
-                      <div className="record-row">
-                        <span>Request ID</span>
-                        <span className="mono truncate">{withdrawal.correspondingLiquidation.requestId}</span>
-                      </div>
-                      <div className="record-row">
-                        <span>Amount</span>
-                        <span>${withdrawal.correspondingLiquidation.amount.toLocaleString()}</span>
-                      </div>
-                      <div className="record-row">
-                        <span>Type</span>
-                        <span className={`type-badge ${withdrawal.correspondingLiquidation.liquidationType.toLowerCase()}`}>
-                          {withdrawal.correspondingLiquidation.liquidationType}
-                        </span>
-                      </div>
-                      <div className="record-row">
-                        <span>Created</span>
-                        <span>{new Date(withdrawal.correspondingLiquidation.createdAt).toLocaleString()}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {withdrawal.correspondingTransfer && (
-                  <div className="record-card">
-                    <div className="record-header">
-                      <span className="record-type">Transfer</span>
-                      <span className={`status-pill ${withdrawal.correspondingTransfer.status.toLowerCase()}`}>
-                        {withdrawal.correspondingTransfer.status}
-                      </span>
-                    </div>
-                    <div className="record-body">
-                      <div className="record-row">
-                        <span>ID</span>
-                        <span className="mono">{withdrawal.correspondingTransfer.id}</span>
-                      </div>
-                      <div className="record-row">
-                        <span>External ID</span>
-                        <span className="mono">{withdrawal.correspondingTransfer.externalId}</span>
-                      </div>
-                      <div className="record-row">
-                        <span>Amount</span>
-                        <span>${withdrawal.correspondingTransfer.amount.toLocaleString()}</span>
-                      </div>
-                      <div className="record-row">
-                        <span>Matched</span>
-                        <span>{withdrawal.correspondingTransfer.matched ? '✓ Yes' : '— No'}</span>
-                      </div>
-                      {withdrawal.correspondingTransfer.matchedTimestamp && (
-                        <div className="record-row">
-                          <span>Matched At</span>
-                          <span>{new Date(withdrawal.correspondingTransfer.matchedTimestamp).toLocaleString()}</span>
-                        </div>
-                      )}
-                      <div className="record-row">
-                        <span>Created</span>
-                        <span>{new Date(withdrawal.correspondingTransfer.createdAt).toLocaleString()}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

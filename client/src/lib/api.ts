@@ -59,6 +59,7 @@ export interface Withdrawal {
   brokerageAccountNumber?: string;
   brokerageId?: string;
   goalId?: string;
+  sleeveId?: string;
   // Audit and action tracking
   auditLog?: AuditEntry[];
   reprocessedFromId?: string;
@@ -72,6 +73,8 @@ export interface DashboardMetrics {
   totalUsers: number;
   withdrawalExceptions: number;
   totalWithdrawalAmount: number;
+  negativePositionsSum: number;
+  negativePositionsCount: number;
   statusSummary?: {
     pendingLiquidation: number;
     transferPending: number;
@@ -79,6 +82,15 @@ export interface DashboardMetrics {
     failed: number;
     retrying: number;
   };
+}
+
+export interface NegativePosition {
+  userId: string;
+  userName: string;
+  sleeveId: string;
+  symbol: string;
+  quantity: number;
+  marketValue: number;
 }
 
 export interface SeasonedCashData {
@@ -143,7 +155,7 @@ export interface AccountSummary {
   positions?: number;
   availableToWithdraw?: number;
   target?: number;
-  portfolioType?: string;
+  sleeveType?: string;
   brokerageAccountNumber?: string;
   brokerageAccountId?: string;
   accountStatus?: string;
@@ -332,6 +344,12 @@ export const dashboardApi = {
   getMetrics: async (): Promise<DashboardMetrics> => {
     if (await shouldUseMock()) return mock.mockDashboardMetrics;
     const response = await api.get('/dashboard/metrics');
+    return response.data;
+  },
+
+  getNegativePositions: async (): Promise<NegativePosition[]> => {
+    if (await shouldUseMock()) return mock.mockNegativePositions;
+    const response = await api.get('/dashboard/negative-positions');
     return response.data;
   },
 };

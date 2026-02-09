@@ -8,7 +8,7 @@ interface AccountSummaryHeaderProps {
     positions?: number;
     availableToWithdraw?: number;
     target?: number;
-    portfolioType?: string;
+    sleeveType?: string;
     brokerageAccountNumber?: string;
     brokerageAccountId?: string;
     accountStatus?: string;
@@ -49,8 +49,8 @@ function AccountSummaryHeader({ summary }: AccountSummaryHeaderProps) {
           <span className="summary-value">{formatCurrency(summary.target)}</span>
         </div>
         <div className="summary-item">
-          <span className="summary-label">Portfolio</span>
-          <span className="summary-value">{summary.portfolioType || 'N/A'}</span>
+          <span className="summary-label">Sleeve</span>
+          <span className="summary-value">{summary.sleeveType || 'N/A'}</span>
         </div>
         <div className="summary-item">
           <span className="summary-label">Brokerage Account #</span>

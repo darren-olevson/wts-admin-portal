@@ -89,6 +89,7 @@ export interface HarborWithdrawal {
   brokerageAccountNumber?: string;
   brokerageId?: string;
   goalId?: string;
+  sleeveId?: string;
   createdAt: string;
   updatedAt: string;
   // Nested liquidation object per EDD
@@ -341,6 +342,7 @@ export interface UIWithdrawal {
   brokerageAccountNumber?: string;
   brokerageId?: string;
   goalId?: string;
+  sleeveId?: string;
   // Nested liquidation detail from EDD
   liquidation?: LiquidationDetail;
   // Completion metrics

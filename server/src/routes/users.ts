@@ -114,7 +114,7 @@ router.get('/:userId/account-summary', async (req, res) => {
       positions: user.positions,
       availableToWithdraw: user.availableToWithdraw,
       target: user.target,
-      portfolioType: user.portfolioType,
+      sleeveType: user.sleeveType,
       brokerageAccountNumber: user.brokerageAccountNumber,
       brokerageAccountId: user.brokerageId,
       accountStatus: user.accountStatus,

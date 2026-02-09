@@ -10,7 +10,7 @@ interface InvestActivityTabProps {
     positions?: number;
     availableToWithdraw?: number;
     target?: number;
-    portfolioType?: string;
+    sleeveType?: string;
     brokerageAccountNumber?: string;
     brokerageAccountId?: string;
     accountStatus?: string;
