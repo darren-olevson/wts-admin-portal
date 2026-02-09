@@ -110,7 +110,7 @@ interface StatusFilterDropdownProps {
   onClear: () => void;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  dropdownRef: React.RefObject<HTMLDivElement | null>;
+  dropdownRef: React.RefObject<HTMLDivElement>;
 }
 
 function StatusFilterDropdown({
